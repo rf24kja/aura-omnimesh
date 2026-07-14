@@ -66,5 +66,17 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Location access is required by iOS to read the Wi-Fi network
+name, which gates compute sharing to trusted networks only.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Discovers nearby Aura mesh nodes for offline sync.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_aura-omnimesh._tcp</string>
+		<string>_aura-omnimesh._udp</string>
+	</array>
+	<key>UIRequiresPersistentWiFi</key>
+	<true/>
 </dict>
 </plist>
