@@ -69,7 +69,7 @@ class CoreNodeBridgeServer {
   bool _running = false;
   bool _disposed = false;
 
-  /// LAN endpoint to embed in the pairing QR: ws://<thisDeviceIp>:<port>.
+  /// LAN endpoint to embed in the pairing QR: `ws://<thisDeviceIp>:<port>`.
   /// IP discovery is the pairing UI's job (NetworkInterface.list).
   Uri get advertisedEndpoint => Uri(scheme: 'ws', host: '0.0.0.0', port: port);
 

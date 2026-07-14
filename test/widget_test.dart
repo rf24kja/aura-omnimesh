@@ -1,9 +1,9 @@
-// This is a basic Flutter widget test.
+// Phase 0 smoke test: the app root must build and render its first frame.
 //
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// bootstrap() is asynchronous and depends on platform channels that do not
+// exist in the test environment, so this pumps exactly one frame and asserts
+// the boot screen is shown — enough to catch any construction-time regression
+// in the composition root.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,20 +11,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:omnimesh/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('app root builds and shows the boot screen', (tester) async {
+    await tester.pumpWidget(const AuraApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(MaterialApp), findsOneWidget);
+    expect(find.text('INITIALIZING MESH NODE'), findsOneWidget);
   });
 }

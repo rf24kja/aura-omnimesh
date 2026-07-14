@@ -366,7 +366,7 @@ String jsonStablePayload({
   final map = <String, dynamic>{
     'op': op,
     'author': author,
-    if (intent != null) 'intent': intent,
+    'intent': ?intent,
     ...?extra,
   };
   return const JsonEncoder().convert(map);
