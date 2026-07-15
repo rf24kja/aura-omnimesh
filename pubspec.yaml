@@ -44,6 +44,7 @@ dependencies:
   permission_handler: ^12.0.1
   qr_flutter: ^4.1.0
   flutter_local_notifications: ^22.0.1
+  flutter_onnxruntime: ^1.8.2
 
 dev_dependencies:
   flutter_test:
@@ -71,9 +72,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    # all-MiniLM-L6-v2 tokenizer vocabulary (Phase 2 groundwork); the
-    # int8 ONNX model joins it when the runtime lands.
+    # all-MiniLM-L6-v2: tokenizer vocabulary + int8-quantized ONNX model.
     - assets/models/vocab.txt
+    - assets/models/minilm_l6_v2_quantized.onnx
 
   # To add assets to your application, add an assets section, like this:
   # assets:

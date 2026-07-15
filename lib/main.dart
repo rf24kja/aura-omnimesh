@@ -17,7 +17,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb, debugPrint;
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -29,6 +29,7 @@ import 'domain/domain_models.dart';
 import 'engine/crdt_materializer.dart';
 import 'engine/mesh_sync_engine.dart';
 import 'engine/reliability_scorer.dart';
+import 'inference/onnx_embedding_service.dart';
 import 'matching/ring_matcher.dart';
 import 'services/services.dart';
 import 'transport/bridge_handle.dart';
@@ -161,13 +162,37 @@ Future<AppServices> bootstrap() async {
     onRingCompleted: notifier?.ringCompleted,
   );
 
-  // --- 5. Inference: deterministic fallback until the ONNX FFI lands. -----
-  // Feature-hashing embeddings — degraded match quality, but real, working,
-  // and CROSS-DEVICE DETERMINISTIC, which is the property E2E testing of
-  // sync + ring matching actually needs. Swap for the ONNX implementation
-  // behind the same interface without touching anything else.
-  final inference = HashingEmbeddingService();
-  await inference.warmUp();
+  // --- 5. Inference: MiniLM ONNX on native, FNV surrogate elsewhere. ------
+  // Web Light Clients stay on the deterministic feature-hashing fallback
+  // until the wasm execution provider is validated. A node that falls
+  // back publishes vectors from a different embedding space — matching
+  // against MiniLM peers degrades to near-zero similarity (missed rings,
+  // never false ones), which is the acceptable failure direction.
+  EdgeInferenceService inference;
+  if (kIsWeb) {
+    inference = HashingEmbeddingService();
+    await inference.warmUp();
+  } else {
+    final onnx = OnnxEmbeddingService();
+    try {
+      await onnx.warmUp();
+      inference = onnx;
+      if (kDebugMode) {
+        // Cross-runtime parity beacon: compare against the same model in
+        // transformers.js — the first dims must agree to ~1e-3.
+        final beacon = await onnx.generateEmbedding('warm up');
+        debugPrint('aura-inference: ONNX MiniLM active, '
+            'beacon=${beacon.take(4).map((v) => v.toStringAsFixed(6)).join(',')}');
+      }
+    } on Object catch (e) {
+      await onnx.dispose();
+      inference = HashingEmbeddingService();
+      await inference.warmUp();
+      if (kDebugMode) {
+        debugPrint('aura-inference: FNV fallback active ($e)');
+      }
+    }
+  }
 
   final composer = IntentComposer(
     engine: engine,
@@ -391,6 +416,10 @@ class IntentComposer {
         operationPayloadJson: payload,
       ),
     ]);
+    if (kDebugMode) {
+      debugPrint('aura-intent: published "$text" '
+          '(${direction.wireValue}) clock=$clock');
+    }
     // No direct row write: the engine's materializer folds the op into a
     // ResourceIntent row before publishLocalDeltas returns.
   }

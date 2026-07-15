@@ -270,6 +270,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
+  flutter_onnxruntime:
+    dependency: "direct main"
+    description:
+      name: flutter_onnxruntime
+      sha256: "82ef1a1f52c6f5cbd3edafc1ac3b07fbf12e6af785a96fa7913afe1471c5e957"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.8.2"
   flutter_secure_storage:
     dependency: "direct main"
     description:
