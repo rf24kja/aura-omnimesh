@@ -101,7 +101,7 @@ class BarterRing {
 
 class RingMatcher {
   const RingMatcher({
-    this.similarityThreshold = 0.45,
+    this.similarityThreshold = 0.42,
     this.minRingLength = 3,
     this.maxRingLength = 7,
     this.maxResults = 20,
@@ -110,8 +110,14 @@ class RingMatcher {
         assert(maxRingLength >= minRingLength && maxRingLength <= 12),
         assert(similarityThreshold > 0 && similarityThreshold < 1);
 
-  /// Minimum offer↔need cosine to admit an edge into the graph. Below
-  /// ~0.45 on MiniLM-class embeddings, matches read as noise to humans.
+  /// Minimum offer↔need cosine to admit an edge into the graph.
+  /// Calibrated 2026-07 on a 40-pair bilingual ad corpus against the
+  /// bundled all-MiniLM-L6-v2 int8: at 0.42 English recall ≈ 90% with
+  /// 0.2% false accepts (negatives: mean 0.08, p95 0.23). NOTE the same
+  /// corpus shows the English-only model CANNOT separate Russian text
+  /// (negatives 0.43–0.75) — a multilingual model swap is the open
+  /// Phase 2 decision, not a threshold problem. Every node must use the
+  /// SAME threshold or ring discovery diverges across the mesh.
   final double similarityThreshold;
 
   final int minRingLength;

@@ -179,9 +179,14 @@ Future<AppServices> bootstrap() async {
       inference = onnx;
       if (kDebugMode) {
         // Cross-runtime parity beacon: compare against the same model in
-        // transformers.js — the first dims must agree to ~1e-3.
+        // transformers.js — the first dims must agree to ~1e-3. The timer
+        // bounds the platform-thread stall per embedding (the plugin runs
+        // session.run synchronously on the main thread).
+        final stopwatch = Stopwatch()..start();
         final beacon = await onnx.generateEmbedding('warm up');
+        stopwatch.stop();
         debugPrint('aura-inference: ONNX MiniLM active, '
+            '${stopwatch.elapsedMilliseconds}ms/embedding, '
             'beacon=${beacon.take(4).map((v) => v.toStringAsFixed(6)).join(',')}');
       }
     } on Object catch (e) {
