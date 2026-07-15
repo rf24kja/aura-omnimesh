@@ -19,6 +19,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'compute/swarm_compute_gate.dart';
@@ -150,11 +151,14 @@ Future<AppServices> bootstrap() async {
     applier: materializer,
   );
   final ringFacade = RingMatchFacade(repository: repository);
+  final notifier = await RingNotificationService.create();
   final adapter = MeshUiAdapter(
     engine: engine,
     repository: repository,
     ringFacade: ringFacade,
     signer: signer,
+    onRingConfirmed: notifier?.ringConfirmed,
+    onRingCompleted: notifier?.ringCompleted,
   );
 
   // --- 5. Inference: deterministic fallback until the ONNX FFI lands. -----
@@ -227,6 +231,86 @@ Future<AppServices> bootstrap() async {
 /// Web launched without a ?bridge=ws://host:port pairing parameter.
 class PairingRequiredException implements Exception {
   const PairingRequiredException();
+}
+
+// ---------------------------------------------------------------------------
+// Ring lifecycle notifications (native only — the plugin has no web impl)
+// ---------------------------------------------------------------------------
+
+class RingNotificationService {
+  RingNotificationService._(this._plugin);
+
+  final FlutterLocalNotificationsPlugin _plugin;
+
+  static const AndroidNotificationDetails _details =
+      AndroidNotificationDetails(
+    'aura.rings',
+    'Ring lifecycle',
+    channelDescription:
+        'Confirmation and completion of exchange rings you are part of.',
+    importance: Importance.high,
+    priority: Priority.high,
+  );
+
+  /// Returns null on web or if platform init fails — notifications are an
+  /// enhancement, never a boot dependency (fail-open for UX, the protocol
+  /// itself stays fail-closed).
+  static Future<RingNotificationService?> create() async {
+    if (kIsWeb) return null;
+    try {
+      final plugin = FlutterLocalNotificationsPlugin();
+      final initialized = await plugin.initialize(
+        settings: const InitializationSettings(
+          android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+          iOS: DarwinInitializationSettings(
+            // The permission gate / OS owns prompting; never at init.
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false,
+          ),
+        ),
+      );
+      if (initialized != true) return null;
+      return RingNotificationService._(plugin);
+    } on Object {
+      return null; // MissingPluginException in tests, unsupported targets.
+    }
+  }
+
+  void ringConfirmed(RoutedRingVm ring) {
+    unawaited(_show(
+      id: ring.ringId.hashCode & 0x7fffffff,
+      title: 'RING CONFIRMED',
+      body: '${ring.hopCount}-party loop locked by everyone — '
+          'fulfil your hop when the exchange happens.',
+    ));
+  }
+
+  void ringCompleted(RoutedRingVm ring) {
+    unawaited(_show(
+      id: (ring.ringId.hashCode & 0x7fffffff) ^ 1,
+      title: 'RING COMPLETED',
+      body: 'All ${ring.hopCount} hops fulfilled. '
+          'Reputation updated from the signed history.',
+    ));
+  }
+
+  Future<void> _show({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    try {
+      await _plugin.show(
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: const NotificationDetails(android: _details),
+      );
+    } on Object {
+      // A failed banner must never disturb the sync path.
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------

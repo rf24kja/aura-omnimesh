@@ -41,6 +41,8 @@ class _PermissionGateState extends State<PermissionGate> {
     Permission.bluetoothAdvertise: 'BLUETOOTH ADVERTISE',
     Permission.bluetoothConnect: 'BLUETOOTH CONNECT',
     Permission.nearbyWifiDevices: 'NEARBY WI-FI DEVICES',
+    // Ring lifecycle notifications; auto-granted below API 33.
+    Permission.notification: 'NOTIFICATIONS',
   };
 
   static bool get _gateApplies =>

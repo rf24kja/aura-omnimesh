@@ -1,0 +1,22 @@
+{
+  "nodes": [
+    {
+      "pub": "e42ce35f9c2c5df7bb970eb103609b4688dfbb24df1ab96a439cdb5dd339f713",
+      "privPkcs8": "302e020100300506032b6570042204203820b7ef96925655f2ca1817d3e84a83d87097f3cd3d3ebf1e5612002451e3d6",
+      "offerUuid": "e49c9705-3c6f-4f5a-b10c-f4abf9da1882",
+      "needUuid": "2a566720-9ae4-4c99-9e8c-7600b4068391"
+    },
+    {
+      "pub": "7595af4f2fc1c862540650ce899bccf0a5e1f4ff90872df20bdd629da6a7902e",
+      "privPkcs8": "302e020100300506032b6570042204203c772e58fee50101f3e12471636fd336b599cbf77be921a0bb1062c5634f570b",
+      "offerUuid": "12d7ab9a-60ab-45f6-aec1-73e44812d516",
+      "needUuid": "282e9fe9-870c-44b9-8600-c4b5645b802b"
+    },
+    {
+      "pub": "89a9d6de8ff40550f05d677d6cc4c9f55e1584c3dc80f1d1ae6720797cf5eb88",
+      "privPkcs8": "302e020100300506032b65700422042034947e1d942f204ecac4e1e461fefb679fe550fbc30d987e5cbf3047bf8ea698",
+      "offerUuid": "b903f836-39f2-481f-b7d4-18fca304f7de",
+      "needUuid": "1c90bdcc-2073-49f8-bc2e-77abb1633165"
+    }
+  ]
+}

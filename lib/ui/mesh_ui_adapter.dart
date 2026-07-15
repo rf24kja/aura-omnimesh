@@ -236,6 +236,8 @@ class MeshUiAdapter {
     required MeshRepository repository,
     required RingMatchFacade ringFacade,
     required IdentitySigner signer,
+    this.onRingConfirmed,
+    this.onRingCompleted,
   })  : _engine = engine,
         _repository = repository,
         _ringFacade = ringFacade,
@@ -245,6 +247,16 @@ class MeshUiAdapter {
   final MeshRepository _repository;
   final RingMatchFacade _ringFacade;
   final IdentitySigner _signer;
+
+  /// Fired once per ring when a SELF-involving ring transitions into the
+  /// confirmed / completed phase. Plugin-free by design: the composition
+  /// root decides what a notification looks like per platform.
+  final void Function(RoutedRingVm ring)? onRingConfirmed;
+  final void Function(RoutedRingVm ring)? onRingCompleted;
+
+  /// ringId → last observed (confirmed, completed) pair, for edge
+  /// detection. Session-scoped: a restart re-announces at most once.
+  final Map<String, (bool, bool)> _ringPhases = {};
 
   final ValueNotifier<MeshUiState> _state =
       ValueNotifier(const MeshUiState());
@@ -362,6 +374,7 @@ class MeshUiAdapter {
         isMatching: false,
         clearError: true,
       ));
+      _announcePhaseTransitions(routed);
     } on Object catch (e) {
       if (_disposed) return;
       _publish(_state.value.copyWith(
@@ -476,6 +489,22 @@ class MeshUiAdapter {
       ));
     }
     return vms;
+  }
+
+  /// Edge-detects confirmed/completed transitions for rings that involve
+  /// this device and fires the composition-root callbacks exactly once
+  /// per transition.
+  void _announcePhaseTransitions(List<RoutedRingVm> routed) {
+    for (final ring in routed) {
+      final previous = _ringPhases[ring.ringId] ?? (false, false);
+      _ringPhases[ring.ringId] = (ring.confirmed, ring.completed);
+      if (!ring.involvesSelf) continue;
+      if (ring.completed && !previous.$2) {
+        onRingCompleted?.call(ring);
+      } else if (ring.confirmed && !previous.$1) {
+        onRingConfirmed?.call(ring);
+      }
+    }
   }
 
   /// Extracts the ringId from a lock/satisfy operation row, or null for
