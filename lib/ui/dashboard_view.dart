@@ -15,10 +15,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../compute/swarm_compute_gate.dart';
 import '../domain/domain_models.dart';
 import '../services/services.dart';
+import '../transport/bridge_handle.dart';
 import 'app_theme.dart';
 import 'mesh_ui_adapter.dart';
 
@@ -31,12 +33,16 @@ class DashboardView extends StatefulWidget {
     required this.computeGate,
     required this.repository,
     required this.onCommandSubmitted,
+    this.bridge,
   });
 
   final MeshUiAdapter adapter;
   final SwarmComputeGate computeGate;
   final MeshRepository repository;
   final Future<void> Function(String command) onCommandSubmitted;
+
+  /// Core Node LAN bridge; null on web Light Clients (no pairing surface).
+  final BridgeHandle? bridge;
 
   @override
   State<DashboardView> createState() => _DashboardViewState();
@@ -54,6 +60,9 @@ class _DashboardViewState extends State<DashboardView> {
   /// Non-null while acceptRing is in flight — drives the blocking
   /// transition overlay.
   String? _lockingRingId;
+
+  /// Non-null while satisfyRing is in flight.
+  String? _fulfillingRingId;
 
   /// Compute opt-in. Opting out stops the gate entirely: no polling, no
   /// eligibility, no work — the strongest possible "out".
@@ -135,6 +144,39 @@ class _DashboardViewState extends State<DashboardView> {
     }
   }
 
+  Future<void> _fulfilRing(String ringId) async {
+    if (_fulfillingRingId != null || _lockingRingId != null) return;
+    HapticFeedback.selectionClick();
+    setState(() => _fulfillingRingId = ringId);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await widget.adapter.satisfyRing(ringId);
+      messenger.showSnackBar(const SnackBar(
+        content: Text('EXCHANGE FULFILLED — GOSSIPING PROOF',
+            style: AuraType.label),
+      ));
+    } on StateError {
+      messenger.showSnackBar(const SnackBar(
+        content: Text('NOTHING TO FULFIL IN THIS RING',
+            style: AuraType.label),
+      ));
+    } finally {
+      if (mounted) setState(() => _fulfillingRingId = null);
+    }
+  }
+
+  Future<void> _showPairDialog() async {
+    final bridge = widget.bridge;
+    if (bridge == null) return;
+    final endpoints = await bridge.pairingEndpoints();
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      barrierColor: AuraColors.scrim,
+      builder: (context) => _PairDialog(endpoints: endpoints),
+    );
+  }
+
   void _toggleComputeOptIn(bool value) {
     setState(() => _computeOptIn = value);
     if (value) {
@@ -182,6 +224,9 @@ class _DashboardViewState extends State<DashboardView> {
                 if (_lockingRingId != null)
                   const _TransitionOverlay(
                       label: 'LOCKING RING — SIGNING & GOSSIPING'),
+                if (_fulfillingRingId != null)
+                  const _TransitionOverlay(
+                      label: 'FULFILLING — SIGNING & GOSSIPING'),
               ],
             );
           },
@@ -208,6 +253,7 @@ class _DashboardViewState extends State<DashboardView> {
         _ModuleNav(
           active: _module,
           onSelect: (module) => setState(() => _module = module),
+          onPair: widget.bridge == null ? null : _showPairDialog,
         ),
         Expanded(
           child: switch (_module) {
@@ -216,6 +262,7 @@ class _DashboardViewState extends State<DashboardView> {
                 isWide: isWide,
                 lockingRingId: _lockingRingId,
                 onAccept: _acceptRing,
+                onFulfil: _fulfilRing,
               ),
             _Module.compute => _ComputePane(
                 gate: widget.computeGate,
@@ -308,10 +355,17 @@ class _SpotlightInput extends StatelessWidget {
 }
 
 class _ModuleNav extends StatelessWidget {
-  const _ModuleNav({required this.active, required this.onSelect});
+  const _ModuleNav({
+    required this.active,
+    required this.onSelect,
+    this.onPair,
+  });
 
   final _Module active;
   final ValueChanged<_Module> onSelect;
+
+  /// Opens the Light Client pairing QR; null on targets without a bridge.
+  final VoidCallback? onPair;
 
   @override
   Widget build(BuildContext context) {
@@ -327,6 +381,25 @@ class _ModuleNav extends StatelessWidget {
           _navItem('EXCHANGE', _Module.exchange),
           _navItem('COMPUTE', _Module.compute),
           _navItem('GRID', _Module.grid),
+          if (onPair != null)
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onPair,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AuraSpace.s2,
+                  vertical: AuraSpace.s2,
+                ),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    left: BorderSide(
+                        color: AuraColors.hairline,
+                        width: AuraStroke.hair),
+                  ),
+                ),
+                child: Text('PAIR', style: AuraType.label),
+              ),
+            ),
         ],
       ),
     );
@@ -402,12 +475,14 @@ class _ExchangePane extends StatelessWidget {
     required this.isWide,
     required this.lockingRingId,
     required this.onAccept,
+    required this.onFulfil,
   });
 
   final MeshUiAdapter adapter;
   final bool isWide;
   final String? lockingRingId;
   final ValueChanged<String> onAccept;
+  final ValueChanged<String> onFulfil;
 
   @override
   Widget build(BuildContext context) {
@@ -415,51 +490,247 @@ class _ExchangePane extends StatelessWidget {
       valueListenable: adapter.state,
       builder: (context, mesh, _) {
         final rings = mesh.discoveredRings;
-        if (rings.isEmpty) {
+        final routed = mesh.routedRings;
+        if (rings.isEmpty && routed.isEmpty) {
           return const _EmptyState(
             title: 'MESH LISTENING',
             detail: 'No closed exchange loops yet. Publish offers and '
                 'needs — rings surface the moment a cycle closes.',
           );
         }
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: AuraSpace.s1),
-          itemCount: rings.length + 1,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return const _SectionHeader(label: 'CLOSED LOOPS');
-            }
-            final ring = rings[index - 1];
-            final card = _RingCard(
+        final children = <Widget>[
+          if (rings.isNotEmpty)
+            const _SectionHeader(label: 'CLOSED LOOPS'),
+          for (final ring in rings) _discoveredEntry(ring),
+          if (routed.isNotEmpty)
+            const _SectionHeader(label: 'ROUTED LOOPS'),
+          for (final ring in routed)
+            _RoutedRingCard(
               ring: ring,
-              isWide: isWide,
-              locking: ring.ringId == lockingRingId,
-              onAccept: () => onAccept(ring.ringId),
-            );
-            if (isWide) return card; // Pointer world: explicit action.
-            return Dismissible(
-              key: ValueKey('ring-${ring.ringId}'),
-              direction: DismissDirection.startToEnd,
-              background: Container(
-                color: AuraColors.obsidian,
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AuraSpace.s2),
-                child: Text('ROUTE →',
-                    style:
-                        AuraType.label.copyWith(color: AuraColors.type)),
-              ),
-              confirmDismiss: (_) async {
-                // State-driven UI safeguard: never let Dismissible remove
-                // the row — the post-lock rematch snapshot does.
-                onAccept(ring.ringId);
-                return false;
-              },
-              child: card,
-            );
-          },
+              onFulfil: () => onFulfil(ring.ringId),
+            ),
+        ];
+        return ListView(
+          padding: const EdgeInsets.symmetric(vertical: AuraSpace.s1),
+          children: children,
         );
       },
+    );
+  }
+
+  Widget _discoveredEntry(RingVm ring) {
+    final card = _RingCard(
+      ring: ring,
+      isWide: isWide,
+      locking: ring.ringId == lockingRingId,
+      onAccept: () => onAccept(ring.ringId),
+    );
+    if (isWide) return card; // Pointer world: explicit action.
+    return Dismissible(
+      key: ValueKey('ring-${ring.ringId}'),
+      direction: DismissDirection.startToEnd,
+      background: Container(
+        color: AuraColors.obsidian,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: AuraSpace.s2),
+        child: Text('ROUTE →',
+            style: AuraType.label.copyWith(color: AuraColors.type)),
+      ),
+      confirmDismiss: (_) async {
+        // State-driven UI safeguard: never let Dismissible remove
+        // the row — the post-lock rematch snapshot does.
+        onAccept(ring.ringId);
+        return false;
+      },
+      child: card,
+    );
+  }
+}
+
+/// Accepted ring tracked through lock confirmation to fulfilment.
+/// Color discipline: emerald indicator stroke only when the protocol
+/// reached a verified-good state (confirmed/completed); amber only for
+/// the broken case. Everything else stays monochrome.
+class _RoutedRingCard extends StatelessWidget {
+  const _RoutedRingCard({required this.ring, required this.onFulfil});
+
+  final RoutedRingVm ring;
+  final VoidCallback onFulfil;
+
+  ({String label, Color stroke}) get _phase {
+    if (ring.broken) {
+      return (label: 'BROKEN — PARTICIPANT WITHDREW', stroke: AuraColors.amber);
+    }
+    if (ring.completed) {
+      return (label: 'COMPLETED', stroke: AuraColors.emerald);
+    }
+    if (ring.confirmed) {
+      return (label: 'CONFIRMED — ALL HOPS LOCKED', stroke: AuraColors.emerald);
+    }
+    return (
+      label: '${ring.committedCount}/${ring.hopCount} LOCKED',
+      stroke: AuraColors.slate,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final phase = _phase;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+          AuraSpace.s2, 0, AuraSpace.s2, AuraSpace.s2),
+      padding: const EdgeInsets.all(AuraSpace.s2),
+      decoration: BoxDecoration(
+        color: AuraColors.carbon,
+        border:
+            Border.all(color: AuraColors.slate, width: AuraStroke.line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: AuraStroke.indicator,
+                height: AuraSpace.s2,
+                color: phase.stroke,
+              ),
+              const SizedBox(width: AuraSpace.s1),
+              Expanded(child: Text(phase.label, style: AuraType.label)),
+              Text('${ring.hopCount}-PARTY', style: AuraType.label),
+            ],
+          ),
+          const SizedBox(height: AuraSpace.s2),
+          for (final hop in ring.hops)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AuraSpace.s1),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 96,
+                    child: Text(
+                      hop.isSelf ? 'YOU' : hop.alias,
+                      style: hop.isSelf
+                          ? AuraType.label.copyWith(color: AuraColors.type)
+                          : AuraType.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(hop.gives,
+                        style: AuraType.bodyDim,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                  ),
+                  const SizedBox(width: AuraSpace.s1),
+                  Text(
+                    switch (hop.status) {
+                      IntentStatus.open => 'PENDING',
+                      IntentStatus.lockedInLoop => 'LOCKED',
+                      IntentStatus.satisfied => 'DONE',
+                      IntentStatus.withdrawn => 'WITHDREW',
+                    },
+                    style: AuraType.label,
+                  ),
+                ],
+              ),
+            ),
+          if (ring.canFulfil) ...[
+            const SizedBox(height: AuraSpace.s1),
+            Row(
+              children: [
+                const Spacer(),
+                GestureDetector(
+                  onTap: onFulfil,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AuraSpace.s2, vertical: AuraSpace.s1),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color: AuraColors.type, width: AuraStroke.line),
+                    ),
+                    child: Text('MARK FULFILLED',
+                        style:
+                            AuraType.label.copyWith(color: AuraColors.type)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Pairing dialog: every LAN endpoint as a scannable QR. The QR module
+/// field is deliberately paper-white — a scanner-hostile inverted code
+/// would be aesthetics over function.
+class _PairDialog extends StatelessWidget {
+  const _PairDialog({required this.endpoints});
+
+  final List<Uri> endpoints;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AuraColors.obsidian,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(color: AuraColors.slate, width: AuraStroke.line),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AuraSpace.s3),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('PAIR LIGHT CLIENT', style: AuraType.label),
+            const SizedBox(height: AuraSpace.s1),
+            const Text(
+              'Open the web client on a device in this network and scan, '
+              'or append ?bridge=<endpoint> to its URL.',
+              style: AuraType.bodyDim,
+            ),
+            const SizedBox(height: AuraSpace.s2),
+            if (endpoints.isEmpty)
+              const Text(
+                'NO LAN ADDRESS — JOIN A WI-FI NETWORK FIRST',
+                style: AuraType.label,
+              )
+            else
+              for (final endpoint in endpoints) ...[
+                Center(
+                  child: Container(
+                    color: AuraColors.type,
+                    padding: const EdgeInsets.all(AuraSpace.s2),
+                    child: QrImageView(
+                      data: endpoint.toString(),
+                      version: QrVersions.auto,
+                      size: 180,
+                      backgroundColor: AuraColors.type,
+                      eyeStyle: const QrEyeStyle(
+                        eyeShape: QrEyeShape.square,
+                        color: AuraColors.obsidian,
+                      ),
+                      dataModuleStyle: const QrDataModuleStyle(
+                        dataModuleShape: QrDataModuleShape.square,
+                        color: AuraColors.obsidian,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AuraSpace.s1),
+                Center(
+                  child: Text('$endpoint', style: AuraType.metric),
+                ),
+                const SizedBox(height: AuraSpace.s2),
+              ],
+          ],
+        ),
+      ),
     );
   }
 }

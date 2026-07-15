@@ -98,6 +98,63 @@ class RingParticipantVm {
   final bool isSelf;
 }
 
+/// One hop of a routed (accepted) ring with its materialized lock state.
+class RoutedHopVm {
+  const RoutedHopVm({
+    required this.publicKey,
+    required this.alias,
+    required this.gives,
+    required this.isSelf,
+    required this.status,
+  });
+
+  final String publicKey;
+  final String alias;
+  final String gives;
+  final bool isSelf;
+
+  /// Materialized status of the hop's OFFER intent — already signature-
+  /// and authorization-checked by the CRDT fold.
+  final IntentStatus status;
+
+  bool get committed =>
+      status == IntentStatus.lockedInLoop || status == IntentStatus.satisfied;
+}
+
+/// A ring some participant has accepted (lock ops exist in the log),
+/// tracked through confirmation to fulfilment.
+class RoutedRingVm {
+  const RoutedRingVm({
+    required this.ringId,
+    required this.hops,
+    required this.involvesSelf,
+    required this.confirmed,
+    required this.completed,
+    required this.broken,
+    required this.canFulfil,
+  });
+
+  final String ringId;
+  final List<RoutedHopVm> hops;
+  final bool involvesSelf;
+
+  /// Every hop has locked (or gone beyond) — the loop is agreed by all.
+  final bool confirmed;
+
+  /// Every hop reached `satisfied` — the exchange happened.
+  final bool completed;
+
+  /// A participant withdrew mid-flight; the loop cannot complete.
+  final bool broken;
+
+  /// This device may author satisfy ops now (own hops locked, ring
+  /// confirmed, not yet fulfilled).
+  final bool canFulfil;
+
+  int get hopCount => hops.length;
+  int get committedCount => hops.where((h) => h.committed).length;
+}
+
 class RingVm {
   const RingVm({
     required this.ringId,
@@ -129,6 +186,7 @@ class MeshUiState {
     this.activePeersCount = 0,
     this.localClock = 0,
     this.discoveredRings = const [],
+    this.routedRings = const [],
     this.isMatching = false,
     this.lastError,
   });
@@ -138,6 +196,10 @@ class MeshUiState {
   final int activePeersCount;
   final int localClock;
   final List<RingVm> discoveredRings;
+
+  /// Accepted rings tracked to confirmation/fulfilment (lock ops in log).
+  final List<RoutedRingVm> routedRings;
+
   final bool isMatching;
   final String? lastError;
 
@@ -147,6 +209,7 @@ class MeshUiState {
     int? activePeersCount,
     int? localClock,
     List<RingVm>? discoveredRings,
+    List<RoutedRingVm>? routedRings,
     bool? isMatching,
     String? lastError,
     bool clearError = false,
@@ -157,6 +220,7 @@ class MeshUiState {
         activePeersCount: activePeersCount ?? this.activePeersCount,
         localClock: localClock ?? this.localClock,
         discoveredRings: discoveredRings ?? this.discoveredRings,
+        routedRings: routedRings ?? this.routedRings,
         isMatching: isMatching ?? this.isMatching,
         lastError: clearError ? null : (lastError ?? this.lastError),
       );
@@ -290,9 +354,11 @@ class MeshUiAdapter {
       for (final ring in rings) {
         vms.add(await _toRingVm(ring));
       }
+      final routed = await _assembleRoutedRings();
       if (_disposed) return;
       _publish(_state.value.copyWith(
         discoveredRings: List.unmodifiable(vms),
+        routedRings: List.unmodifiable(routed),
         isMatching: false,
         clearError: true,
       ));
@@ -339,6 +405,158 @@ class MeshUiAdapter {
         : '${publicKey.substring(0, 8)}…';
     _aliasCache[publicKey] = alias;
     return alias;
+  }
+
+  // -------------------------------------------------------------------------
+  // Routed rings: lock ops in the log, tracked to confirmation/fulfilment
+  // -------------------------------------------------------------------------
+
+  /// Scans the CRDT log for lock operations and assembles per-ring
+  /// progress from MATERIALIZED intent rows (the fold already did the
+  /// signature + authorization work — this is a pure read-side view).
+  ///
+  /// The full-log scan is deliberate Phase-1 simplicity: corpora are
+  /// hundreds of rows, and the materializer re-folds full logs anyway. If
+  /// this ever shows up in a profile, add a ringId-indexed query behind
+  /// MeshRepository rather than caching here.
+  Future<List<RoutedRingVm>> _assembleRoutedRings() async {
+    final self = _signer.publicKeyHex;
+    final log = await _repository.readDeltasSince(0);
+
+    final ringIds = <String>{};
+    for (final row in log) {
+      final ringId = _lockRingIdOf(row);
+      if (ringId != null) ringIds.add(ringId);
+    }
+
+    final vms = <RoutedRingVm>[];
+    for (final ringId in ringIds.toList()..sort()) {
+      // canonicalId encodes the ring's OFFER intent uuids in rotation-
+      // canonical order — the id itself names the hops.
+      final offerUuids = ringId.split('>');
+      if (offerUuids.length < 2) continue;
+
+      final hops = <RoutedHopVm>[];
+      var missing = false;
+      for (final uuid in offerUuids) {
+        final offer = await _repository.findIntentByUuid(uuid);
+        if (offer == null) {
+          // Lock gossip outran create gossip — benign under partition;
+          // the ring renders once the corpus catches up.
+          missing = true;
+          break;
+        }
+        hops.add(RoutedHopVm(
+          publicKey: offer.originNodeKey,
+          alias: await _resolveAlias(offer.originNodeKey),
+          gives: offer.rawTextPayload,
+          isSelf: offer.originNodeKey == self,
+          status: offer.status,
+        ));
+      }
+      if (missing) continue;
+
+      final broken = hops.any((h) => h.status == IntentStatus.withdrawn);
+      final confirmed = !broken && hops.every((h) => h.committed);
+      final completed =
+          !broken && hops.every((h) => h.status == IntentStatus.satisfied);
+      final involvesSelf = hops.any((h) => h.isSelf);
+      final selfDone = hops
+          .where((h) => h.isSelf)
+          .every((h) => h.status == IntentStatus.satisfied);
+
+      vms.add(RoutedRingVm(
+        ringId: ringId,
+        hops: hops,
+        involvesSelf: involvesSelf,
+        confirmed: confirmed,
+        completed: completed,
+        broken: broken,
+        canFulfil: involvesSelf && confirmed && !completed && !selfDone,
+      ));
+    }
+    return vms;
+  }
+
+  /// Extracts the ringId from a lock/satisfy operation row, or null for
+  /// every other row shape. Malformed payloads are ignored, not errors —
+  /// the log accepts hostile input by design.
+  String? _lockRingIdOf(CrdtStateLog row) {
+    try {
+      final decoded = jsonDecode(row.operationPayloadJson);
+      if (decoded is! Map<String, dynamic>) return null;
+      if (decoded['op'] != 'lock_intent') return null;
+      final ringId = decoded['ringId'];
+      return ringId is String ? ringId : null;
+    } on FormatException {
+      return null;
+    }
+  }
+
+  /// Authors satisfy operations for every intent THIS device locked into
+  /// [ringId]. Callable only once the ring is confirmed (UI gate); the
+  /// materializer enforces the real rules regardless.
+  Future<void> satisfyRing(String ringId) async {
+    _checkNotDisposed();
+    final self = _signer.publicKeyHex;
+
+    // Own lock ops name the intents to satisfy — including own NEED
+    // intents, which the canonicalId (offers only) cannot name.
+    final log = await _repository.readDeltasSince(0);
+    final ownLockedUuids = <String>{};
+    for (final row in log) {
+      if (_lockRingIdOf(row) != ringId) continue;
+      final decoded =
+          jsonDecode(row.operationPayloadJson) as Map<String, dynamic>;
+      if (decoded['author'] == self) {
+        ownLockedUuids.add(row.targetIntentUuid);
+      }
+    }
+    if (ownLockedUuids.isEmpty) {
+      throw StateError(
+        'This device locked no intents in ring $ringId — nothing to '
+        'fulfil.',
+      );
+    }
+
+    final pending = <String>[];
+    for (final uuid in ownLockedUuids) {
+      final intent = await _repository.findIntentByUuid(uuid);
+      if (intent != null && intent.status == IntentStatus.lockedInLoop) {
+        pending.add(uuid);
+      }
+    }
+    if (pending.isEmpty) return; // Already satisfied — idempotent UX.
+    pending.sort(); // Deterministic op order across devices.
+
+    final baseClock = await _repository.currentLamportClock();
+    final deltas = <CrdtStateLog>[];
+    var offset = 1;
+    for (final uuid in pending) {
+      final payload = jsonEncode(<String, dynamic>{
+        'op': 'satisfy_intent',
+        'intentUuid': uuid,
+        'ringId': ringId,
+        'status': IntentStatus.satisfied.wireValue,
+        'author': self,
+      });
+      final clock = baseClock + offset;
+      offset += 1;
+      deltas.add(CrdtStateLog(
+        transactionUuid: secureUuidV4(),
+        targetIntentUuid: uuid,
+        authoritySignature: await _signer.signToHex(
+          crdtSignaturePreimage(payload, clock),
+        ),
+        lamportLogicalClock: clock,
+        operationPayloadJson: payload,
+      ));
+    }
+
+    // Same single write path as acceptRing: durable append + fold + gossip
+    // through the engine; never a direct row write beside it.
+    await _engine.publishLocalDeltas(deltas);
+    await _rematch();
   }
 
   // -------------------------------------------------------------------------

@@ -4,6 +4,8 @@
 // behind the platform-free BridgeHandle so the composition root stays
 // importable on every target.
 
+import 'dart:io';
+
 import '../domain/domain_models.dart';
 import '../engine/mesh_sync_engine.dart';
 import '../services/services.dart';
@@ -32,6 +34,20 @@ class _CoreNodeBridgeHandle implements BridgeHandle {
 
   @override
   Uri get advertisedEndpoint => _server.advertisedEndpoint;
+
+  @override
+  Future<List<Uri>> pairingEndpoints() async {
+    final interfaces = await NetworkInterface.list(
+      type: InternetAddressType.IPv4,
+      includeLoopback: false,
+      includeLinkLocal: false,
+    );
+    return [
+      for (final interface in interfaces)
+        for (final address in interface.addresses)
+          Uri(scheme: 'ws', host: address.address, port: _server.port),
+    ];
+  }
 
   @override
   Future<void> start() => _server.start();

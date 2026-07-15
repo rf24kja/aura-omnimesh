@@ -617,6 +617,7 @@ class _Shell extends StatelessWidget {
             computeGate: services.computeGate,
             repository: services.repository,
             onCommandSubmitted: services.composer.submitCommand,
+            bridge: services.bridge,
           ),
         ),
         _StatusStrip(services: services),

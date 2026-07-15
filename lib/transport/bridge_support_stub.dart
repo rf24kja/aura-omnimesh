@@ -16,3 +16,7 @@ BridgeHandle? createBridgeServer({
   required MeshRepository repository,
 }) =>
     null;
+
+// Nothing else: on web the composition root receives null and no
+// pairing surface renders — the Light Client is the SCANNER of the QR,
+// never its source.
