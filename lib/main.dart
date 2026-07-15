@@ -27,6 +27,7 @@ import 'data/isar_mesh_repository.dart';
 import 'domain/domain_models.dart';
 import 'engine/crdt_materializer.dart';
 import 'engine/mesh_sync_engine.dart';
+import 'engine/reliability_scorer.dart';
 import 'matching/ring_matcher.dart';
 import 'services/services.dart';
 import 'transport/bridge_handle.dart';
@@ -65,6 +66,7 @@ class AppServices {
     required this.composer,
     required this.computeGate,
     required this.bridge,
+    required this.scorer,
   });
 
   final MeshRepository repository;
@@ -79,9 +81,12 @@ class AppServices {
   /// Core Node LAN bridge (PLATFORM_SETUP §3); null on web Light Clients.
   final BridgeHandle? bridge;
 
+  final ReliabilityScorer scorer;
+
   Future<void> dispose() async {
     // Bridge first, before the engine, so client relays stop cleanly.
     await bridge?.dispose();
+    await scorer.dispose();
     computeGate.stop();
     await adapter.dispose();
     await engine.dispose(); // Stops discovery internally.
@@ -183,6 +188,11 @@ Future<AppServices> bootstrap() async {
     // stays fatal (fail-closed invariant: unverified bridge → terminate).
   }
 
+  // --- 7b. Reputation fold: signed satisfied-ring history → scores. --------
+  final scorer = ReliabilityScorer(repository)
+    ..attachTo(engine.onNewDeltasPersisted);
+  unawaited(scorer.recompute()); // Seed from already-persisted history.
+
   // --- 8. Core Node LAN bridge (PLATFORM_SETUP §3, native only). -----------
   BridgeHandle? bridge = createBridgeServer(
     signer: signer,
@@ -210,6 +220,7 @@ Future<AppServices> bootstrap() async {
     composer: composer,
     computeGate: computeGate,
     bridge: bridge,
+    scorer: scorer,
   );
 }
 
