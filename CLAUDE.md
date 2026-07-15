@@ -7,6 +7,9 @@ Full plan: ROADMAP.md. Current phase: **Phase 0 — make everything compile.**
 ```bash
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs   # after ANY schema change
+dart run tool/fix_web_ids.dart   # ALWAYS run right after codegen: rewrites
+                                 # isar 3.1.0+1 schema-id literals that dart2js
+                                 # rejects (see tool/fix_web_ids.dart header)
 flutter analyze          # must be zero errors AND zero warnings
 flutter test
 flutter run -d <device>

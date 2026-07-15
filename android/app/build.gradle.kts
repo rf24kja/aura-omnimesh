@@ -6,7 +6,9 @@ plugins {
 
 android {
     namespace = "com.aura.omnimesh"
-    compileSdk = flutter.compileSdkVersion
+    // androidx transitives of play-services-nearby 19.1.0 require API 36;
+    // Flutter's default compileSdkVersion still resolves to 35.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

@@ -33,6 +33,7 @@ import 'transport/hybrid_transport_service.dart';
 import 'ui/app_theme.dart';
 import 'ui/dashboard_view.dart';
 import 'ui/mesh_ui_adapter.dart';
+import 'ui/permission_gate.dart';
 
 // Local aliases of the design system tokens (app_theme.dart).
 const Color _canvas = AuraColors.obsidian;
@@ -544,19 +545,24 @@ class _AuraAppState extends State<AuraApp> {
       title: 'Aura OmniMesh',
       debugShowCheckedModeBanner: false,
       theme: AuraTheme.dark(),
-      home: FutureBuilder<AppServices>(
-        future: _boot,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return _BootErrorScreen(error: snapshot.error!);
-          }
-          final services = snapshot.data;
-          if (services == null) {
-            return const _BootScreen(label: 'INITIALIZING MESH NODE');
-          }
-          _services = services;
-          return _Shell(services: services);
-        },
+      // Phase 0 onboarding: the Android radio permissions must be granted
+      // before the gate builds the FutureBuilder — reading _boot is what
+      // starts bootstrap(), so the mesh node cannot race its permissions.
+      home: PermissionGate(
+        builder: (context) => FutureBuilder<AppServices>(
+          future: _boot,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return _BootErrorScreen(error: snapshot.error!);
+            }
+            final services = snapshot.data;
+            if (services == null) {
+              return const _BootScreen(label: 'INITIALIZING MESH NODE');
+            }
+            _services = services;
+            return _Shell(services: services);
+          },
+        ),
       ),
     );
   }

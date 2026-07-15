@@ -15,7 +15,7 @@ extension GetNodeIdentityCollection on Isar {
 
 const NodeIdentitySchema = CollectionSchema(
   name: r'NodeIdentity',
-  id: 9038499392437358949,
+  id: (2104439631 * 4294967296 + 886051173),
   properties: {
     r'cryptographicPublicKey': PropertySchema(
       id: 0,
@@ -45,7 +45,7 @@ const NodeIdentitySchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'cryptographicPublicKey': IndexSchema(
-      id: -5110183270848784316,
+      id: (-1189807261 * 4294967296 + 3689551940),
       name: r'cryptographicPublicKey',
       unique: true,
       replace: false,
@@ -931,7 +931,7 @@ extension GetResourceIntentCollection on Isar {
 
 const ResourceIntentSchema = CollectionSchema(
   name: r'ResourceIntent',
-  id: 8667911549906105658,
+  id: (2018155425 * 4294967296 + 1286124858),
   properties: {
     r'allocationCategory': PropertySchema(
       id: 0,
@@ -989,7 +989,7 @@ const ResourceIntentSchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'intentUuid': IndexSchema(
-      id: 4548438602546737674,
+      id: (1059015887 * 4294967296 + 1937306122),
       name: r'intentUuid',
       unique: true,
       replace: true,
@@ -1002,7 +1002,7 @@ const ResourceIntentSchema = CollectionSchema(
       ],
     ),
     r'originNodeKey': IndexSchema(
-      id: -4390633975573404326,
+      id: (-1022274135 * 4294967296 + 1798284634),
       name: r'originNodeKey',
       unique: false,
       replace: false,
@@ -1015,7 +1015,7 @@ const ResourceIntentSchema = CollectionSchema(
       ],
     ),
     r'epochTimestamp': IndexSchema(
-      id: -9151321446426978325,
+      id: (-2130708063 * 4294967296 + 1481529323),
       name: r'epochTimestamp',
       unique: false,
       replace: false,
@@ -3038,7 +3038,7 @@ extension GetCrdtStateLogCollection on Isar {
 
 const CrdtStateLogSchema = CollectionSchema(
   name: r'CrdtStateLog',
-  id: 6606120135497158350,
+  id: (1538107203 * 4294967296 + 870125262),
   properties: {
     r'authoritySignature': PropertySchema(
       id: 0,
@@ -3073,7 +3073,7 @@ const CrdtStateLogSchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'transactionUuid': IndexSchema(
-      id: -5468758077976123440,
+      id: (-1273294464 * 4294967296 + 3081725904),
       name: r'transactionUuid',
       unique: true,
       replace: false,
@@ -3086,7 +3086,7 @@ const CrdtStateLogSchema = CollectionSchema(
       ],
     ),
     r'targetIntentUuid_lamportLogicalClock': IndexSchema(
-      id: -5228129618252962927,
+      id: (-1217268785 * 4294967296 + 3763692433),
       name: r'targetIntentUuid_lamportLogicalClock',
       unique: false,
       replace: false,
