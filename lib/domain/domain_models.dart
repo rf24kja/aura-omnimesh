@@ -6,13 +6,13 @@
 //
 // pubspec.yaml (minimum):
 //   dependencies:
-//     isar: ^3.1.0
-//     isar_flutter_libs: ^3.1.0
+//     isar_community: ^3.3.2
+//     isar_community_flutter_libs: ^3.3.2
 //   dev_dependencies:
-//     isar_generator: ^3.1.0
+//     isar_community_generator: ^3.3.2
 //     build_runner: ^2.4.0
 
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 
 part 'domain_models.g.dart';
 

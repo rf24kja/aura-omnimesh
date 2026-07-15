@@ -10,7 +10,7 @@
 //     isar_flutter_libs: ^3.1.0
 //     path_provider: ^2.1.0
 
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../domain/domain_models.dart';
