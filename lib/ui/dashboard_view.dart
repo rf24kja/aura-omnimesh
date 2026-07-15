@@ -811,6 +811,14 @@ class _RingCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis),
                   ),
+                  // Locally derived trust from completed-ring history;
+                  // silent at zero — no fabricated figures.
+                  if (!participant.isSelf &&
+                      participant.reliabilityScore > 0) ...[
+                    const SizedBox(width: AuraSpace.s1),
+                    Text('TRUST ${participant.reliabilityScore}',
+                        style: AuraType.label),
+                  ],
                 ],
               ),
             ),

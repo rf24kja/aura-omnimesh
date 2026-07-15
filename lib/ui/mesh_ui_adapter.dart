@@ -88,6 +88,7 @@ class RingParticipantVm {
     required this.alias,
     required this.gives,
     required this.isSelf,
+    this.reliabilityScore = 0,
   });
 
   final String publicKey;
@@ -96,6 +97,11 @@ class RingParticipantVm {
   /// Raw text of the offer this participant contributes to the loop.
   final String gives;
   final bool isSelf;
+
+  /// Locally computed trust (ReliabilityScorer fold, 0–100). Zero for
+  /// unknown or unproven peers — the UI stays silent rather than showing
+  /// a fabricated number (fail-closed rendering).
+  final int reliabilityScore;
 }
 
 /// One hop of a routed (accepted) ring with its materialized lock state.
@@ -394,11 +400,16 @@ class MeshUiAdapter {
     final self = _signer.publicKeyHex;
     final participants = <RingParticipantVm>[];
     for (final edge in ring.edges) {
+      // Score is read fresh each rematch (never cached like aliases):
+      // completed rings move it, and a stale trust figure at the accept
+      // decision would be worse than none.
+      final node = await _repository.findNodeByPublicKey(edge.providerKey);
       participants.add(RingParticipantVm(
         publicKey: edge.providerKey,
         alias: await _resolveAlias(edge.providerKey),
         gives: edge.offer.rawTextPayload,
         isSelf: edge.providerKey == self,
+        reliabilityScore: node?.reliabilityScore ?? 0,
       ));
     }
     return RingVm(
