@@ -29,6 +29,8 @@ import 'engine/crdt_materializer.dart';
 import 'engine/mesh_sync_engine.dart';
 import 'matching/ring_matcher.dart';
 import 'services/services.dart';
+import 'transport/bridge_handle.dart';
+import 'transport/bridge_support.dart';
 import 'transport/hybrid_transport_service.dart';
 import 'ui/app_theme.dart';
 import 'ui/dashboard_view.dart';
@@ -62,6 +64,7 @@ class AppServices {
     required this.adapter,
     required this.composer,
     required this.computeGate,
+    required this.bridge,
   });
 
   final MeshRepository repository;
@@ -73,7 +76,12 @@ class AppServices {
   final IntentComposer composer;
   final SwarmComputeGate computeGate;
 
+  /// Core Node LAN bridge (PLATFORM_SETUP §3); null on web Light Clients.
+  final BridgeHandle? bridge;
+
   Future<void> dispose() async {
+    // Bridge first, before the engine, so client relays stop cleanly.
+    await bridge?.dispose();
     computeGate.stop();
     await adapter.dispose();
     await engine.dispose(); // Stops discovery internally.
@@ -165,7 +173,32 @@ Future<AppServices> bootstrap() async {
 
   // --- 7. Go live. ---------------------------------------------------------
   await adapter.attach();
-  await engine.start(selfIdentity: selfIdentity);
+  try {
+    await engine.start(selfIdentity: selfIdentity);
+  } on MeshUnreachableException {
+    // Local-first: a dead radio stack is a degraded state, not a boot
+    // failure. The engine has already published disconnected/error, so the
+    // status strip honestly reads MESH: OFFLINE while the durable log and
+    // store-and-forward keep working. UnverifiedBridgeException deliberately
+    // stays fatal (fail-closed invariant: unverified bridge → terminate).
+  }
+
+  // --- 8. Core Node LAN bridge (PLATFORM_SETUP §3, native only). -----------
+  BridgeHandle? bridge = createBridgeServer(
+    signer: signer,
+    selfIdentity: selfIdentity,
+    engine: engine,
+    transport: transport,
+    repository: repository,
+  );
+  try {
+    await bridge?.start();
+  } on Object {
+    // The LAN bridge is auxiliary (a bound :7411 from another instance must
+    // not kill the node) — mesh radios and local state remain fully live.
+    await bridge?.dispose();
+    bridge = null;
+  }
 
   return AppServices(
     repository: repository,
@@ -176,6 +209,7 @@ Future<AppServices> bootstrap() async {
     adapter: adapter,
     composer: composer,
     computeGate: computeGate,
+    bridge: bridge,
   );
 }
 
