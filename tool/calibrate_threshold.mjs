@@ -50,7 +50,7 @@ const RU_PAIRS = [
   ['дам дрель и инструменты на время', 'одолжить дрель повесить полки'],
 ];
 
-const embed = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', { quantized: true });
+const embed = await pipeline('feature-extraction', 'Xenova/paraphrase-multilingual-MiniLM-L12-v2', { quantized: true });
 const vec = async (t) => Array.from((await embed(t, { pooling: 'mean', normalize: true })).data);
 const cos = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0); // both normalized
 

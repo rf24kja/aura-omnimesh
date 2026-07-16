@@ -31,7 +31,7 @@ const crdtPreimage = (payloadJson, clock) => {
 console.log('loading MiniLM (transformers.js, quantized)…');
 const embed = await pipeline(
   'feature-extraction',
-  'Xenova/all-MiniLM-L6-v2',
+  'Xenova/paraphrase-multilingual-MiniLM-L12-v2',
   { quantized: true },
 );
 const vec = async (text) => {
@@ -42,10 +42,13 @@ const vec = async (text) => {
 const B = newNode();
 const C = newNode();
 const intents = [
-  [B, 'offer', 'electric scooter to borrow in march'],
-  [B, 'need', 'help learning flutter and dart development'],
-  [C, 'offer', 'weekly delivery of fresh vegetables'],
-  [C, 'need', 'to borrow a scooter for a month'],
+  // Mixed-language ring with the device user (EN):
+  //   EMU offer EN vegetables -> B need RU; B offer RU guitar ->
+  //   C need RU; C offer EN moving -> EMU need EN sofa.
+  [B, 'need', 'нужна доставка свежих овощей на дом'],
+  [B, 'offer', 'уроки игры на гитаре с нуля'],
+  [C, 'need', 'хочу научиться играть на гитаре'],
+  [C, 'offer', 'help moving furniture this weekend'],
 ];
 
 const logs = [];

@@ -72,9 +72,11 @@ flutter:
   uses-material-design: true
 
   assets:
-    # all-MiniLM-L6-v2: tokenizer vocabulary + int8-quantized ONNX model.
+    # paraphrase-multilingual-MiniLM-L12-v2: int8 ONNX + Unigram vocab.
+    # (vocab.txt stays for the WordPiece tokenizer + its tests.)
+    - assets/models/minilm_multilingual_quantized.onnx
+    - assets/models/xlmr_unigram_vocab.tsv
     - assets/models/vocab.txt
-    - assets/models/minilm_l6_v2_quantized.onnx
 
   # To add assets to your application, add an assets section, like this:
   # assets:

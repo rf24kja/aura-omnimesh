@@ -16,7 +16,9 @@
 // The ONNX runtime lands behind EdgeInferenceService in Phase 2 proper;
 // this file is runtime-agnostic on purpose.
 
-class WordPieceTokenizer {
+import 'token_encoder.dart';
+
+class WordPieceTokenizer implements TokenEncoder {
   WordPieceTokenizer(List<String> vocabLines)
       : _vocab = {
           for (var i = 0; i < vocabLines.length; i++)
@@ -68,6 +70,7 @@ class WordPieceTokenizer {
   /// Model-ready id sequence: `[CLS] … [SEP]`, hard-capped at [maxTokens]
   /// ids. Over-long input is truncated, never an error — user text length
   /// is not the caller's problem (EdgeInferenceService contract).
+  @override
   List<int> encode(String text, {int maxTokens = 256}) {
     assert(maxTokens >= 2, 'need room for [CLS] and [SEP]');
     final pieces = tokenize(text);

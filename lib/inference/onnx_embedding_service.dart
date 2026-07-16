@@ -19,33 +19,46 @@ import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
 
 import '../domain/domain_models.dart';
 import '../services/services.dart';
+import 'sentencepiece_tokenizer.dart';
+import 'token_encoder.dart';
 import 'wordpiece_tokenizer.dart';
 
+/// Which tokenizer family the bundled model expects.
+enum EmbeddingTokenizerKind { wordPiece, sentencePieceUnigram }
+
 class OnnxEmbeddingService implements EdgeInferenceService {
+  /// Defaults target paraphrase-multilingual-MiniLM-L12-v2 — chosen over
+  /// the English-only L6 after the bilingual corpus calibration showed
+  /// L6 cannot separate Russian at all (see RingMatcher threshold doc).
   OnnxEmbeddingService({
-    this.modelAsset = 'assets/models/minilm_l6_v2_quantized.onnx',
-    this.vocabAsset = 'assets/models/vocab.txt',
+    this.modelAsset = 'assets/models/minilm_multilingual_quantized.onnx',
+    this.vocabAsset = 'assets/models/xlmr_unigram_vocab.tsv',
+    this.tokenizerKind = EmbeddingTokenizerKind.sentencePieceUnigram,
     this.maxTokens = 256,
   });
 
   final String modelAsset;
   final String vocabAsset;
+  final EmbeddingTokenizerKind tokenizerKind;
 
   /// Context window incl. [CLS]/[SEP]; longer input is truncated by the
   /// tokenizer, never an error (interface contract).
   final int maxTokens;
 
   OrtSession? _session;
-  WordPieceTokenizer? _tokenizer;
+  TokenEncoder? _tokenizer;
   List<String> _inputNames = const [];
 
   @override
   Future<void> warmUp() async {
     if (_session != null) return; // Safe to call repeatedly.
 
-    _tokenizer = WordPieceTokenizer(
-      (await rootBundle.loadString(vocabAsset)).split('\n'),
-    );
+    final vocabLines = (await rootBundle.loadString(vocabAsset)).split('\n');
+    _tokenizer = switch (tokenizerKind) {
+      EmbeddingTokenizerKind.wordPiece => WordPieceTokenizer(vocabLines),
+      EmbeddingTokenizerKind.sentencePieceUnigram =>
+        SentencePieceUnigramTokenizer(vocabLines),
+    };
     final session =
         await OnnxRuntime().createSessionFromAsset(modelAsset);
     _session = session;
