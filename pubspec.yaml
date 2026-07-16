@@ -74,8 +74,8 @@ flutter:
   assets:
     # paraphrase-multilingual-MiniLM-L12-v2: int8 ONNX + Unigram vocab.
     # (vocab.txt stays for the WordPiece tokenizer + its tests.)
-    - assets/models/minilm_multilingual_quantized.onnx
-    - assets/models/xlmr_unigram_vocab.tsv
+    - assets/models/minilm_multilingual_trimmed_v1.onnx
+    - assets/models/xlmr_vocab_trimmed_v1.tsv
     - assets/models/vocab.txt
 
   # To add assets to your application, add an assets section, like this:

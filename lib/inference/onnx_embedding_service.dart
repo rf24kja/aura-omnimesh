@@ -1,13 +1,19 @@
 // lib/inference/onnx_embedding_service.dart
 //
-// Phase 2: production embeddings. all-MiniLM-L6-v2 (int8-quantized ONNX,
-// bundled asset) behind the EdgeInferenceService contract — nothing above
-// this layer changes when the FNV surrogate is swapped out, exactly as
-// the architecture planned.
+// Phase 2: production embeddings. Vocabulary-trimmed
+// paraphrase-multilingual-MiniLM-L12-v2 (int8 ONNX asset, see
+// assets/models/README.md) behind the EdgeInferenceService contract —
+// nothing above this layer changes when models swap, exactly as the
+// architecture planned.
 //
-// Pipeline per sentence-transformers: WordPiece ids -> transformer ->
-// mean pooling over the attention mask -> L2 normalization (dot product
-// == cosine on the hot path, per the interface contract).
+// Pipeline per sentence-transformers: SentencePiece Unigram ids ->
+// transformer -> mean pooling -> L2 normalization (dot product == cosine
+// on the hot path, per the interface contract).
+//
+// ASSET NAMING RULE: flutter_onnxruntime caches the extracted model in
+// the app temp dir BY FILE NAME and reuses any existing copy across APK
+// updates. Ship a different model => bump the version suffix in the
+// asset file name, or updated installs keep running the old weights.
 //
 // Native targets only: the composition root keeps web Light Clients on
 // the FNV fallback until the wasm execution provider is validated.
@@ -31,8 +37,8 @@ class OnnxEmbeddingService implements EdgeInferenceService {
   /// the English-only L6 after the bilingual corpus calibration showed
   /// L6 cannot separate Russian at all (see RingMatcher threshold doc).
   OnnxEmbeddingService({
-    this.modelAsset = 'assets/models/minilm_multilingual_quantized.onnx',
-    this.vocabAsset = 'assets/models/xlmr_unigram_vocab.tsv',
+    this.modelAsset = 'assets/models/minilm_multilingual_trimmed_v1.onnx',
+    this.vocabAsset = 'assets/models/xlmr_vocab_trimmed_v1.tsv',
     this.tokenizerKind = EmbeddingTokenizerKind.sentencePieceUnigram,
     this.maxTokens = 256,
   });
