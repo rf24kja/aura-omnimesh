@@ -167,6 +167,30 @@ class CoreNodeBridgeServer {
           // bridge does not vouch for content, only transports it.
           await _engine.publishLocalDeltas(logs);
 
+        case 'syncRequest':
+          // Anti-entropy for Light Clients: a late joiner pulls the
+          // durable backlog instead of waiting for fresh gossip. Pull,
+          // not push-on-hello — the client asks only after it has
+          // VERIFIED this bridge, so no race with the handshake, and a
+          // reconnecting client can pass its high-water clock.
+          if (!client.greeted) return;
+          final afterClock = frame['afterClock'];
+          final backlog = await _repository
+              .readDeltasSince(afterClock is int ? afterClock : 0);
+          // Batched frames: one giant frame for a long history would
+          // block the socket and spike Light Client frame decoding.
+          const batchSize = 200;
+          for (var i = 0; i < backlog.length; i += batchSize) {
+            final end = (i + batchSize).clamp(0, backlog.length);
+            client.socket.add(jsonEncode(<String, dynamic>{
+              'type': 'delta',
+              'logs': backlog
+                  .sublist(i, end)
+                  .map(crdtLogToWire)
+                  .toList(growable: false),
+            }));
+          }
+
         default:
           break; // Forward-compatible: ignore unknown frame types.
       }

@@ -86,8 +86,25 @@ ws.onopen = () => {
 };
 
 let handshakeDone = false;
+// --sync mode: after the verified handshake, pull the durable backlog
+// and report how many ops arrive (late-joiner anti-entropy check).
+const syncMode = process.argv.includes('--sync');
+let syncCount = 0;
+let syncTimer = null;
+
 ws.onmessage = (event) => {
   const frame = JSON.parse(event.data);
+  if (syncMode && handshakeDone && frame.type === 'delta') {
+    syncCount += (frame.logs || []).length;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => {
+      console.log(`backlog received: ${syncCount} op(s)`);
+      console.log(syncCount > 0 ? 'RESULT: SYNC_OK' : 'RESULT: SYNC_EMPTY');
+      ws.close();
+      process.exit(syncCount > 0 ? 0 : 1);
+    }, 1200);
+    return;
+  }
   if (frame.type === 'helloResponse' && !handshakeDone) {
     const ok = crypto.verify(
       null,
@@ -102,6 +119,16 @@ ws.onmessage = (event) => {
       process.exit(1);
     }
     handshakeDone = true;
+    if (syncMode) {
+      console.log('handshake verified — requesting backlog');
+      ws.send(JSON.stringify({ type: 'syncRequest', afterClock: 0 }));
+      syncTimer = setTimeout(() => {
+        console.log('backlog received: 0 op(s)');
+        console.log('RESULT: SYNC_EMPTY');
+        process.exit(1);
+      }, 5000);
+      return;
+    }
     console.log('sending signed create_intent', uuid);
     ws.send(
       JSON.stringify({

@@ -758,6 +758,18 @@ class WebSocketLightClientTransport implements LocalMeshTransportService {
     _bridgeVerified = true;
     _reconnectAttempt = 0; // Healthy verified link resets backoff.
 
+    // Pull the durable backlog now that the bridge is verified — a late
+    // joiner converges immediately instead of waiting for fresh gossip.
+    // Requested AFTER verification on purpose: the delta gate below
+    // drops frames from an unverified bridge, so a push-on-hello reply
+    // would race the async signature check and be lost. afterClock 0 is
+    // correct for the ephemeral in-memory Light Client store; replayed
+    // rows dedupe by transactionUuid on append (idempotent by design).
+    _channel?.sink.add(jsonEncode(<String, dynamic>{
+      'type': 'syncRequest',
+      'afterClock': 0,
+    }));
+
     _discoveryController.add(NodeDiscoveryEvent(
       node: NodeIdentity(
         cryptographicPublicKey: frame.publicKeyHex,
