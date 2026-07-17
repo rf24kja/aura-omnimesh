@@ -73,6 +73,15 @@ class CrdtMaterializer implements DeltaApplier {
   /// force repeated verification work on every re-fold.
   final Set<String> _rejectedTx = {};
 
+  /// Cumulative session counters for the diagnostics surface. Distinct
+  /// hostile/corrupt ops are counted once (the _rejectedTx cache absorbs
+  /// re-fold repeats); rule rejections include benign partition artifacts
+  /// by design — see MaterializationReport.
+  int get totalRejectedSignatures => _rejectedTx.length;
+  int totalApplied = 0;
+  int totalRejectedRule = 0;
+  int totalFolds = 0;
+
   @override
   Future<void> applyDeltas(List<CrdtStateLog> deltas) async {
     final targets = <String>{for (final d in deltas) d.targetIntentUuid};
@@ -173,6 +182,12 @@ class CrdtMaterializer implements DeltaApplier {
     if (state != null) {
       await _repository.upsertIntent(state);
     }
+
+    // Re-folds recount applied ops; the counter tracks fold WORK, which
+    // is what the diagnostics surface is for — not unique-op accounting.
+    totalFolds += 1;
+    totalApplied += applied;
+    totalRejectedRule += rejectedRule;
 
     return MaterializationReport(
       intentUuid: intentUuid,

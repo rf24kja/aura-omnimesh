@@ -69,6 +69,8 @@ class AppServices {
     required this.computeGate,
     required this.bridge,
     required this.scorer,
+    required this.materializer,
+    required this.inferenceLabel,
   });
 
   final MeshRepository repository;
@@ -84,6 +86,12 @@ class AppServices {
   final BridgeHandle? bridge;
 
   final ReliabilityScorer scorer;
+
+  /// Sole intent-row writer; its counters feed the diagnostics surface.
+  final CrdtMaterializer materializer;
+
+  /// Which embedding backend won at boot (ONNX vs FNV fallback).
+  final String inferenceLabel;
 
   Future<void> dispose() async {
     // Bridge first, before the engine, so client relays stop cleanly.
@@ -169,10 +177,12 @@ Future<AppServices> bootstrap() async {
   // degrades to near-zero similarity (missed rings, never false ones),
   // which is the acceptable failure direction.
   EdgeInferenceService inference;
+  String inferenceLabel;
   final onnx = OnnxEmbeddingService();
   try {
     await onnx.warmUp();
     inference = onnx;
+    inferenceLabel = 'ONNX MiniLM (multilingual)';
     if (kDebugMode) {
       // Cross-runtime parity beacon: must match the python int8 reference
       // (tool/trim_model.py output). The timer bounds the platform-thread
@@ -189,6 +199,7 @@ Future<AppServices> bootstrap() async {
     await onnx.dispose();
     inference = HashingEmbeddingService();
     await inference.warmUp();
+    inferenceLabel = 'FNV fallback (degraded)';
     if (kDebugMode) {
       debugPrint('aura-inference: FNV fallback active ($e)');
     }
@@ -250,6 +261,8 @@ Future<AppServices> bootstrap() async {
     computeGate: computeGate,
     bridge: bridge,
     scorer: scorer,
+    materializer: materializer,
+    inferenceLabel: inferenceLabel,
   );
 }
 
@@ -779,33 +792,138 @@ class _StatusStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: const BoxDecoration(
-        color: _canvas,
-        border: Border(top: BorderSide(color: _border, width: 0.5)),
+    return GestureDetector(
+      // Long-press opens the serverless diagnostics surface (ROADMAP
+      // Phase 3): materializer counters, clock, peers, inference backend.
+      behavior: HitTestBehavior.opaque,
+      onLongPress: () => showDialog<void>(
+        context: context,
+        barrierColor: AuraColors.scrim,
+        builder: (_) => _DiagnosticsDialog(services: services),
       ),
-      child: SafeArea(
-        top: false,
-        child: ValueListenableBuilder<MeshUiState>(
-          valueListenable: services.adapter.state,
-          builder: (context, mesh, _) {
-            return ValueListenableBuilder<ComputeEligibility>(
-              valueListenable: services.computeGate.eligibility,
-              builder: (context, compute, _) {
-                return Text(
-                  'MESH: ${_connection(mesh.connectionState)} · '
-                  'PEERS: ${mesh.activePeersCount} · '
-                  'CLOCK: ${mesh.localClock} · '
-                  'COMPUTE: ${_compute(compute)}',
-                  style: _labelStyle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                );
-              },
-            );
-          },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: const BoxDecoration(
+          color: _canvas,
+          border: Border(top: BorderSide(color: _border, width: 0.5)),
         ),
+        child: SafeArea(
+          top: false,
+          child: ValueListenableBuilder<MeshUiState>(
+            valueListenable: services.adapter.state,
+            builder: (context, mesh, _) {
+              return ValueListenableBuilder<ComputeEligibility>(
+                valueListenable: services.computeGate.eligibility,
+                builder: (context, compute, _) {
+                  return Text(
+                    'MESH: ${_connection(mesh.connectionState)} · '
+                    'PEERS: ${mesh.activePeersCount} · '
+                    'CLOCK: ${mesh.localClock} · '
+                    'COMPUTE: ${_compute(compute)}',
+                    style: _labelStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Serverless diagnostics (ROADMAP Phase 3): the only window into mesh
+/// health when there is no backend to query. Counters are read live on
+/// open — a StatefulBuilder REFRESH re-reads them without reopening.
+class _DiagnosticsDialog extends StatelessWidget {
+  const _DiagnosticsDialog({required this.services});
+
+  final AppServices services;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelStyle = _StatusStrip._labelStyle;
+    return Dialog(
+      backgroundColor: _canvas,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(color: _border, width: 1),
+      ),
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          final mesh = services.adapter.state.value;
+          final materializer = services.materializer;
+          final rows = <(String, String)>[
+            ('MESH', switch (mesh.connectionState) {
+              MeshConnectionState.disconnected => 'OFFLINE',
+              MeshConnectionState.connecting => 'SEARCHING',
+              MeshConnectionState.secureBridge => 'SECURE',
+            }),
+            ('VERIFIED PEERS', '${mesh.activePeersCount}'),
+            ('LAMPORT CLOCK', '${mesh.localClock}'),
+            ('SYNC', mesh.syncStatus.name),
+            ('INFERENCE', services.inferenceLabel),
+            ('FOLDS', '${materializer.totalFolds}'),
+            ('OPS APPLIED', '${materializer.totalApplied}'),
+            ('REJECTED · SIG', '${materializer.totalRejectedSignatures}'),
+            ('REJECTED · RULE', '${materializer.totalRejectedRule}'),
+            ('BRIDGE', services.bridge == null ? '—' : 'HOSTING'),
+            ('LAST ERROR', mesh.lastError ?? '—'),
+          ];
+          return Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('DIAGNOSTICS', style: labelStyle),
+                const SizedBox(height: 16),
+                for (final (k, v) in rows)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 150,
+                          child: Text(k, style: labelStyle),
+                        ),
+                        Expanded(
+                          child: Text(
+                            v,
+                            style: const TextStyle(
+                              color: _type,
+                              fontSize: 12,
+                              fontFeatures: [FontFeature.tabularFigures()],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: () => setState(() {}),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration:
+                          const BoxDecoration(border: Border.fromBorderSide(
+                        BorderSide(color: _border, width: 1),
+                      )),
+                      child: Text('REFRESH',
+                          style: labelStyle.copyWith(color: _type)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

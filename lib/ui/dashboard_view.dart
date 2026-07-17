@@ -64,6 +64,9 @@ class _DashboardViewState extends State<DashboardView> {
   /// Non-null while satisfyRing is in flight.
   String? _fulfillingRingId;
 
+  /// Non-null while a withdrawIntent is in flight.
+  String? _withdrawingUuid;
+
   /// Compute opt-in. Opting out stops the gate entirely: no polling, no
   /// eligibility, no work — the strongest possible "out".
   bool _computeOptIn = true;
@@ -165,6 +168,26 @@ class _DashboardViewState extends State<DashboardView> {
     }
   }
 
+  Future<void> _withdrawIntent(String intentUuid) async {
+    if (_withdrawingUuid != null) return;
+    HapticFeedback.selectionClick();
+    setState(() => _withdrawingUuid = intentUuid);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await widget.adapter.withdrawIntent(intentUuid);
+      messenger.showSnackBar(const SnackBar(
+        content: Text('INTENT WITHDRAWN — GOSSIPING', style: AuraType.label),
+      ));
+    } on StateError {
+      messenger.showSnackBar(const SnackBar(
+        content: Text('CANNOT WITHDRAW — NOT YOURS OR ALREADY CLOSED',
+            style: AuraType.label),
+      ));
+    } finally {
+      if (mounted) setState(() => _withdrawingUuid = null);
+    }
+  }
+
   Future<void> _showPairDialog() async {
     final bridge = widget.bridge;
     if (bridge == null) return;
@@ -227,6 +250,9 @@ class _DashboardViewState extends State<DashboardView> {
                 if (_fulfillingRingId != null)
                   const _TransitionOverlay(
                       label: 'FULFILLING — SIGNING & GOSSIPING'),
+                if (_withdrawingUuid != null)
+                  const _TransitionOverlay(
+                      label: 'WITHDRAWING — SIGNING & GOSSIPING'),
               ],
             );
           },
@@ -261,8 +287,10 @@ class _DashboardViewState extends State<DashboardView> {
                 adapter: widget.adapter,
                 isWide: isWide,
                 lockingRingId: _lockingRingId,
+                withdrawingUuid: _withdrawingUuid,
                 onAccept: _acceptRing,
                 onFulfil: _fulfilRing,
+                onWithdraw: _withdrawIntent,
               ),
             _Module.compute => _ComputePane(
                 gate: widget.computeGate,
@@ -474,15 +502,19 @@ class _ExchangePane extends StatelessWidget {
     required this.adapter,
     required this.isWide,
     required this.lockingRingId,
+    required this.withdrawingUuid,
     required this.onAccept,
     required this.onFulfil,
+    required this.onWithdraw,
   });
 
   final MeshUiAdapter adapter;
   final bool isWide;
   final String? lockingRingId;
+  final String? withdrawingUuid;
   final ValueChanged<String> onAccept;
   final ValueChanged<String> onFulfil;
+  final ValueChanged<String> onWithdraw;
 
   @override
   Widget build(BuildContext context) {
@@ -491,7 +523,8 @@ class _ExchangePane extends StatelessWidget {
       builder: (context, mesh, _) {
         final rings = mesh.discoveredRings;
         final routed = mesh.routedRings;
-        if (rings.isEmpty && routed.isEmpty) {
+        final own = mesh.ownIntents;
+        if (rings.isEmpty && routed.isEmpty && own.isEmpty) {
           return const _EmptyState(
             title: 'MESH LISTENING',
             detail: 'No closed exchange loops yet. Publish offers and '
@@ -508,6 +541,14 @@ class _ExchangePane extends StatelessWidget {
             _RoutedRingCard(
               ring: ring,
               onFulfil: () => onFulfil(ring.ringId),
+            ),
+          if (own.isNotEmpty)
+            const _SectionHeader(label: 'MY INTENTS'),
+          for (final intent in own)
+            _OwnIntentRow(
+              intent: intent,
+              busy: intent.intentUuid == withdrawingUuid,
+              onWithdraw: () => onWithdraw(intent.intentUuid),
             ),
         ];
         return ListView(
@@ -543,6 +584,94 @@ class _ExchangePane extends StatelessWidget {
         return false;
       },
       child: card,
+    );
+  }
+}
+
+/// One row of the MY INTENTS management surface: the author's view of a
+/// published intent with a withdraw affordance while it is still live.
+class _OwnIntentRow extends StatelessWidget {
+  const _OwnIntentRow({
+    required this.intent,
+    required this.busy,
+    required this.onWithdraw,
+  });
+
+  final OwnIntentVm intent;
+  final bool busy;
+  final VoidCallback onWithdraw;
+
+  ({String word, Color stroke}) get _status => switch (intent.status) {
+        IntentStatus.open => (word: 'OPEN', stroke: AuraColors.slate),
+        IntentStatus.lockedInLoop => (
+            word: 'LOCKED',
+            stroke: AuraColors.emerald,
+          ),
+        IntentStatus.satisfied => (
+            word: 'SATISFIED',
+            stroke: AuraColors.emerald,
+          ),
+        IntentStatus.withdrawn => (
+            word: 'WITHDRAWN',
+            stroke: AuraColors.amber,
+          ),
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final status = _status;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+          AuraSpace.s2, 0, AuraSpace.s2, AuraSpace.s1),
+      padding: const EdgeInsets.all(AuraSpace.s2),
+      decoration: BoxDecoration(
+        color: AuraColors.carbon,
+        border: Border.all(color: AuraColors.slate, width: AuraStroke.line),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: AuraStroke.indicator,
+            height: AuraSpace.s3,
+            margin: const EdgeInsets.only(top: 2),
+            color: status.stroke,
+          ),
+          const SizedBox(width: AuraSpace.s2),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${intent.direction == IntentDirection.offer ? 'OFFER' : 'NEED'}'
+                  '  ·  ${status.word}',
+                  style: AuraType.label,
+                ),
+                const SizedBox(height: 4),
+                Text(intent.text,
+                    style: AuraType.bodyDim,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis),
+              ],
+            ),
+          ),
+          if (intent.canWithdraw) ...[
+            const SizedBox(width: AuraSpace.s2),
+            GestureDetector(
+              onTap: busy ? null : onWithdraw,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AuraSpace.s2, vertical: AuraSpace.s1),
+                decoration: BoxDecoration(
+                  border:
+                      Border.all(color: AuraColors.slate, width: AuraStroke.line),
+                ),
+                child: Text('WITHDRAW', style: AuraType.label),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

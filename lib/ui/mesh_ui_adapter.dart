@@ -104,6 +104,27 @@ class RingParticipantVm {
   final int reliabilityScore;
 }
 
+/// This device's own published intent, for the MY INTENTS management
+/// surface — the author's view of what it has committed to the mesh.
+class OwnIntentVm {
+  const OwnIntentVm({
+    required this.intentUuid,
+    required this.text,
+    required this.direction,
+    required this.status,
+  });
+
+  final String intentUuid;
+  final String text;
+  final IntentDirection direction;
+  final IntentStatus status;
+
+  /// Only live intents can be withdrawn — satisfied/withdrawn are
+  /// absorbing states in the CRDT fold.
+  bool get canWithdraw =>
+      status == IntentStatus.open || status == IntentStatus.lockedInLoop;
+}
+
 /// One hop of a routed (accepted) ring with its materialized lock state.
 class RoutedHopVm {
   const RoutedHopVm({
@@ -193,6 +214,7 @@ class MeshUiState {
     this.localClock = 0,
     this.discoveredRings = const [],
     this.routedRings = const [],
+    this.ownIntents = const [],
     this.isMatching = false,
     this.lastError,
   });
@@ -206,6 +228,9 @@ class MeshUiState {
   /// Accepted rings tracked to confirmation/fulfilment (lock ops in log).
   final List<RoutedRingVm> routedRings;
 
+  /// This device's own published intents (management surface).
+  final List<OwnIntentVm> ownIntents;
+
   final bool isMatching;
   final String? lastError;
 
@@ -216,6 +241,7 @@ class MeshUiState {
     int? localClock,
     List<RingVm>? discoveredRings,
     List<RoutedRingVm>? routedRings,
+    List<OwnIntentVm>? ownIntents,
     bool? isMatching,
     String? lastError,
     bool clearError = false,
@@ -227,6 +253,7 @@ class MeshUiState {
         localClock: localClock ?? this.localClock,
         discoveredRings: discoveredRings ?? this.discoveredRings,
         routedRings: routedRings ?? this.routedRings,
+        ownIntents: ownIntents ?? this.ownIntents,
         isMatching: isMatching ?? this.isMatching,
         lastError: clearError ? null : (lastError ?? this.lastError),
       );
@@ -373,10 +400,12 @@ class MeshUiAdapter {
         vms.add(await _toRingVm(ring));
       }
       final routed = await _assembleRoutedRings();
+      final own = await _assembleOwnIntents();
       if (_disposed) return;
       _publish(_state.value.copyWith(
         discoveredRings: List.unmodifiable(vms),
         routedRings: List.unmodifiable(routed),
+        ownIntents: List.unmodifiable(own),
         isMatching: false,
         clearError: true,
       ));
@@ -531,6 +560,71 @@ class MeshUiAdapter {
     } on FormatException {
       return null;
     }
+  }
+
+  /// This device's published intents, newest first — the author's
+  /// management view (fed by the same materialized rows as everything
+  /// else, so statuses are always post-fold truth).
+  Future<List<OwnIntentVm>> _assembleOwnIntents() async {
+    final self = _signer.publicKeyHex;
+    final corpus = await _repository.readIntentsByCategory(
+      AllocationCategory.peerExchange,
+    );
+    final own = corpus
+        .where((i) => i.originNodeKey == self)
+        .toList(growable: false)
+      ..sort((a, b) => b.epochTimestamp.compareTo(a.epochTimestamp));
+    return [
+      for (final intent in own)
+        OwnIntentVm(
+          intentUuid: intent.intentUuid,
+          text: intent.rawTextPayload,
+          direction: intent.direction,
+          status: intent.status,
+        ),
+    ];
+  }
+
+  /// Withdraws one of THIS device's intents: authors a signed
+  /// withdraw_intent op through the single publishLocalDeltas write path.
+  /// Withdrawing a locked intent deliberately breaks its ring — the
+  /// routed card flips to BROKEN on every participant via the same fold
+  /// rules that keep them convergent.
+  Future<void> withdrawIntent(String intentUuid) async {
+    _checkNotDisposed();
+    final self = _signer.publicKeyHex;
+
+    final intent = await _repository.findIntentByUuid(intentUuid);
+    if (intent == null || intent.originNodeKey != self) {
+      throw StateError(
+        'Intent $intentUuid is not owned by this device — only the '
+        'author may withdraw (authorization invariant).',
+      );
+    }
+    if (intent.status == IntentStatus.satisfied ||
+        intent.status == IntentStatus.withdrawn) {
+      return; // Absorbing states — idempotent UX, nothing to author.
+    }
+
+    final payload = jsonEncode(<String, dynamic>{
+      'op': 'withdraw_intent',
+      'intentUuid': intentUuid,
+      'status': IntentStatus.withdrawn.wireValue,
+      'author': self,
+    });
+    final clock = await _repository.currentLamportClock() + 1;
+    await _engine.publishLocalDeltas([
+      CrdtStateLog(
+        transactionUuid: secureUuidV4(),
+        targetIntentUuid: intentUuid,
+        authoritySignature: await _signer.signToHex(
+          crdtSignaturePreimage(payload, clock),
+        ),
+        lamportLogicalClock: clock,
+        operationPayloadJson: payload,
+      ),
+    ]);
+    await _rematch(); // The withdrawn intent leaves the open corpus now.
   }
 
   /// Authors satisfy operations for every intent THIS device locked into

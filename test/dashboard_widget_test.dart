@@ -228,4 +228,62 @@ void main() {
     expect(find.text('YOU'), findsOneWidget);
     expect(find.text('LOCKED'), findsNWidgets(2));
   });
+
+  testWidgets('own intents surface with withdraw; tap authors a withdraw',
+      (tester) async {
+    await tester.runAsync(() async {
+      await buildStack();
+      // Real signed create op so the materializer fold owns the row —
+      // that is what makes the withdraw fold-through work end to end.
+      final create = jsonStablePayload(
+        op: 'create_intent',
+        author: self.publicKeyHex,
+        intent: <String, dynamic>{
+          'intentUuid': 'mine-open',
+          'originNodeKey': self.publicKeyHex,
+          'category': 'peer_exchange',
+          'direction': 'offer',
+          'rawText': 'dart tutoring for beginners',
+          'vector': List<double>.filled(kEmbeddingDimensions, 0.0)..[0] = 1.0,
+          'quantity': 1,
+          'epochMs': 2000,
+        },
+      );
+      await engine.publishLocalDeltas([
+        CrdtStateLog(
+          transactionUuid: 'tx-create-mine',
+          targetIntentUuid: 'mine-open',
+          authoritySignature:
+              await self.signToHex(crdtSignaturePreimage(create, 1)),
+          lamportLogicalClock: 1,
+          operationPayloadJson: create,
+        ),
+      ]);
+      // A satisfied intent (row-only) — must show but not be withdrawable.
+      await repository.upsertIntent(_intent(
+          uuid: 'mine-done', owner: self.publicKeyHex,
+          direction: IntentDirection.need, axis: 1,
+          rawText: 'groceries', status: IntentStatus.satisfied));
+      await adapter.attach();
+    });
+    await tester.pumpWidget(host());
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('MY INTENTS'), findsOneWidget);
+    expect(find.text('dart tutoring for beginners'), findsOneWidget);
+    // Live intent is withdrawable; the satisfied one is not.
+    expect(find.text('WITHDRAW'), findsOneWidget);
+
+    await tester.tap(find.text('WITHDRAW'));
+    await tester.runAsync(() => Future<void>.delayed(
+        const Duration(milliseconds: 300)));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // The withdraw op folded the row into the absorbing withdrawn state,
+    // so it is no longer withdrawable.
+    await tester.runAsync(() async {
+      final row = await repository.findIntentByUuid('mine-open');
+      expect(row!.status, IntentStatus.withdrawn);
+    });
+  });
 }
