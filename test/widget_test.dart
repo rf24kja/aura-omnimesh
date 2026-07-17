@@ -30,12 +30,24 @@ void main() {
         }
       },
     );
+    // Identity gate passes: a stored alias short-circuits onboarding.
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+      (call) async {
+        if (call.method == 'read') {
+          final key = (call.arguments as Map)['key'];
+          if (key == kAliasStorageKey) return 'smoke-tester';
+        }
+        return null;
+      },
+    );
 
     await tester.pumpWidget(const AuraApp());
     expect(find.byType(MaterialApp), findsOneWidget);
 
-    // Let the gate's async status check resolve; the next frame is the
-    // composition root's boot screen.
+    // Two async gates resolve (permissions, then stored alias), then the
+    // composition root's boot screen paints.
+    await tester.pump();
     await tester.pump();
     expect(find.text('INITIALIZING MESH NODE'), findsOneWidget);
   });

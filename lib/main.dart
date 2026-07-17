@@ -37,6 +37,7 @@ import 'transport/bridge_support.dart';
 import 'transport/hybrid_transport_service.dart';
 import 'ui/app_theme.dart';
 import 'ui/dashboard_view.dart';
+import 'ui/identity_gate.dart';
 import 'ui/mesh_ui_adapter.dart';
 import 'ui/permission_gate.dart';
 
@@ -46,6 +47,25 @@ const Color _type = AuraColors.type;
 const Color _border = AuraColors.slate;
 
 const String _kSeedStorageKey = 'aura.identity.seed.v1';
+const String kAliasStorageKey = 'aura.identity.alias.v1';
+
+/// Load-or-create the device identity. Idempotent through secure
+/// storage, so the onboarding identity screen and bootstrap() share ONE
+/// custody path: whoever runs first creates the seed, the other reads
+/// the same one. The seed itself never leaves platform secure storage.
+Future<Ed25519IdentitySigner> loadOrCreateSigner() async {
+  const secureStorage = FlutterSecureStorage();
+  final storedSeed = await secureStorage.read(key: _kSeedStorageKey);
+  if (storedSeed != null) {
+    return Ed25519IdentitySigner.fromSeedHex(storedSeed);
+  }
+  final signer = await Ed25519IdentitySigner.generate();
+  await secureStorage.write(
+    key: _kSeedStorageKey,
+    value: await signer.exportSeedHex(),
+  );
+  return signer;
+}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -110,24 +130,18 @@ Future<AppServices> bootstrap() async {
   // --- 1. Identity: load-or-create the Ed25519 seed. ----------------------
   // Secure enclave-backed storage on native (Keychain/Keystore); on web,
   // flutter_secure_storage wraps WebCrypto-encrypted browser storage —
-  // adequate for an ephemeral Light Client identity.
+  // adequate for an ephemeral Light Client identity. The alias comes
+  // from onboarding (IdentityGate); the key-derived name is the
+  // fallback for pre-alias installs.
+  final signer = await loadOrCreateSigner();
   const secureStorage = FlutterSecureStorage();
-  final storedSeed = await secureStorage.read(key: _kSeedStorageKey);
-
-  final Ed25519IdentitySigner signer;
-  if (storedSeed == null) {
-    signer = await Ed25519IdentitySigner.generate();
-    await secureStorage.write(
-      key: _kSeedStorageKey,
-      value: await signer.exportSeedHex(),
-    );
-  } else {
-    signer = await Ed25519IdentitySigner.fromSeedHex(storedSeed);
-  }
+  final storedAlias = await secureStorage.read(key: kAliasStorageKey);
 
   final selfIdentity = NodeIdentity(
     cryptographicPublicKey: signer.publicKeyHex,
-    localAlias: 'node-${signer.publicKeyHex.substring(0, 6)}',
+    localAlias: (storedAlias == null || storedAlias.trim().isEmpty)
+        ? 'node-${signer.publicKeyHex.substring(0, 6)}'
+        : storedAlias.trim(),
     reliabilityScore: 0,
   );
 
@@ -716,23 +730,28 @@ class _AuraAppState extends State<AuraApp> {
       title: 'Aura OmniMesh',
       debugShowCheckedModeBanner: false,
       theme: AuraTheme.dark(),
-      // Phase 0 onboarding: the Android radio permissions must be granted
-      // before the gate builds the FutureBuilder — reading _boot is what
-      // starts bootstrap(), so the mesh node cannot race its permissions.
+      // Onboarding chain: radio permissions, then identity (alias +
+      // public key). Both gate the FutureBuilder — reading _boot is what
+      // starts bootstrap(), so the mesh node can race neither its
+      // permissions nor its stored alias.
       home: PermissionGate(
-        builder: (context) => FutureBuilder<AppServices>(
-          future: _boot,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return _BootErrorScreen(error: snapshot.error!);
-            }
-            final services = snapshot.data;
-            if (services == null) {
-              return const _BootScreen(label: 'INITIALIZING MESH NODE');
-            }
-            _services = services;
-            return _Shell(services: services);
-          },
+        builder: (context) => IdentityGate(
+          aliasStorageKey: kAliasStorageKey,
+          loadSigner: loadOrCreateSigner,
+          builder: (context) => FutureBuilder<AppServices>(
+            future: _boot,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return _BootErrorScreen(error: snapshot.error!);
+              }
+              final services = snapshot.data;
+              if (services == null) {
+                return const _BootScreen(label: 'INITIALIZING MESH NODE');
+              }
+              _services = services;
+              return _Shell(services: services);
+            },
+          ),
         ),
       ),
     );
@@ -856,6 +875,11 @@ class _DiagnosticsDialog extends StatelessWidget {
           final mesh = services.adapter.state.value;
           final materializer = services.materializer;
           final rows = <(String, String)>[
+            ('ALIAS', services.selfIdentity.localAlias),
+            (
+              'PUBLIC KEY',
+              services.signer.publicKeyHex,
+            ),
             ('MESH', switch (mesh.connectionState) {
               MeshConnectionState.disconnected => 'OFFLINE',
               MeshConnectionState.connecting => 'SEARCHING',
