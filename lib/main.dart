@@ -162,40 +162,35 @@ Future<AppServices> bootstrap() async {
     onRingCompleted: notifier?.ringCompleted,
   );
 
-  // --- 5. Inference: MiniLM ONNX on native, FNV surrogate elsewhere. ------
-  // Web Light Clients stay on the deterministic feature-hashing fallback
-  // until the wasm execution provider is validated. A node that falls
-  // back publishes vectors from a different embedding space — matching
-  // against MiniLM peers degrades to near-zero similarity (missed rings,
-  // never false ones), which is the acceptable failure direction.
+  // --- 5. Inference: MiniLM ONNX everywhere, FNV surrogate as fallback. ---
+  // The int32-surface model runs on native ORT and on the vendored wasm
+  // runtime (web/ort/). A node that falls back to FNV publishes vectors
+  // from a different embedding space — matching against MiniLM peers
+  // degrades to near-zero similarity (missed rings, never false ones),
+  // which is the acceptable failure direction.
   EdgeInferenceService inference;
-  if (kIsWeb) {
+  final onnx = OnnxEmbeddingService();
+  try {
+    await onnx.warmUp();
+    inference = onnx;
+    if (kDebugMode) {
+      // Cross-runtime parity beacon: must match the python int8 reference
+      // (tool/trim_model.py output). The timer bounds the platform-thread
+      // stall per embedding (the plugin runs session.run synchronously on
+      // the Android main thread).
+      final stopwatch = Stopwatch()..start();
+      final beacon = await onnx.generateEmbedding('warm up');
+      stopwatch.stop();
+      debugPrint('aura-inference: ONNX MiniLM active, '
+          '${stopwatch.elapsedMilliseconds}ms/embedding, '
+          'beacon=${beacon.take(4).map((v) => v.toStringAsFixed(6)).join(',')}');
+    }
+  } on Object catch (e) {
+    await onnx.dispose();
     inference = HashingEmbeddingService();
     await inference.warmUp();
-  } else {
-    final onnx = OnnxEmbeddingService();
-    try {
-      await onnx.warmUp();
-      inference = onnx;
-      if (kDebugMode) {
-        // Cross-runtime parity beacon: compare against the same model in
-        // transformers.js — the first dims must agree to ~1e-3. The timer
-        // bounds the platform-thread stall per embedding (the plugin runs
-        // session.run synchronously on the main thread).
-        final stopwatch = Stopwatch()..start();
-        final beacon = await onnx.generateEmbedding('warm up');
-        stopwatch.stop();
-        debugPrint('aura-inference: ONNX MiniLM active, '
-            '${stopwatch.elapsedMilliseconds}ms/embedding, '
-            'beacon=${beacon.take(4).map((v) => v.toStringAsFixed(6)).join(',')}');
-      }
-    } on Object catch (e) {
-      await onnx.dispose();
-      inference = HashingEmbeddingService();
-      await inference.warmUp();
-      if (kDebugMode) {
-        debugPrint('aura-inference: FNV fallback active ($e)');
-      }
+    if (kDebugMode) {
+      debugPrint('aura-inference: FNV fallback active ($e)');
     }
   }
 

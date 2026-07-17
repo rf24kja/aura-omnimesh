@@ -19,7 +19,7 @@ session = ort.InferenceSession(
 
 
 def embed(text):
-    ids = np.array([tok.encode(text).ids], dtype=np.int64)
+    ids = np.array([tok.encode(text).ids], dtype=np.int32)
     hidden = session.run(
         ["last_hidden_state"],
         {"input_ids": ids, "attention_mask": np.ones_like(ids)},

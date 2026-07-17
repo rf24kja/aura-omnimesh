@@ -139,11 +139,28 @@ for label, pairs in (("EN", EN_PAIRS), ("RU", RU_PAIRS)):
               f"false={false*100:.1f}%  (true min {tp[0]:.3f})")
 
 # --- export ----------------------------------------------------------------
+# INT32 input surface: dart2js has no Int64List and the web ORT plugin
+# cannot up-convert, so the graph itself accepts int32 and casts to int64
+# internally. One artifact for every platform.
+
+
+class Int32Surface(torch.nn.Module):
+    def __init__(self, base):
+        super().__init__()
+        self.base = base
+
+    def forward(self, input_ids, attention_mask):
+        return self.base(
+            input_ids=input_ids.long(),
+            attention_mask=attention_mask.long(),
+        ).last_hidden_state
+
+
 enc = trimmed_tok.encode("пример текста для экспорта")
-ids = torch.tensor([enc.ids])
+ids = torch.tensor([enc.ids], dtype=torch.int32)
 dynamic = {0: "batch", 1: "sequence"}
 torch.onnx.export(
-    model,
+    Int32Surface(model),
     (ids, torch.ones_like(ids)),
     OUT_FP32,
     input_names=["input_ids", "attention_mask"],
@@ -164,7 +181,7 @@ import onnxruntime as ort  # noqa: E402
 
 session = ort.InferenceSession(OUT_INT8, providers=["CPUExecutionProvider"])
 w = trimmed_tok.encode("warm up")
-wi = np.array([w.ids], dtype=np.int64)
+wi = np.array([w.ids], dtype=np.int32)
 hidden = session.run(["last_hidden_state"],
                      {"input_ids": wi,
                       "attention_mask": np.ones_like(wi)})[0]

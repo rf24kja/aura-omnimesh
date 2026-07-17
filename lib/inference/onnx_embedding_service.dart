@@ -15,16 +15,22 @@
 // updates. Ship a different model => bump the version suffix in the
 // asset file name, or updated installs keep running the old weights.
 //
-// Native targets only: the composition root keeps web Light Clients on
-// the FNV fallback until the wasm execution provider is validated.
+// Runs on native AND web. The exported graph takes INT32 ids/mask and
+// casts internally: dart2js has no Int64List, and the web ORT plugin
+// cannot up-convert — so the model surface meets every platform where
+// it stands. Web setup: web/index.html must load the vendored
+// web/ort/ort.min.js before the Flutter bootstrap (local-first: no CDN).
 
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
 
 import '../domain/domain_models.dart';
 import '../services/services.dart';
+import 'model_bytes_url_stub.dart'
+    if (dart.library.js_interop) 'model_bytes_url_web.dart';
 import 'sentencepiece_tokenizer.dart';
 import 'token_encoder.dart';
 import 'wordpiece_tokenizer.dart';
@@ -37,7 +43,7 @@ class OnnxEmbeddingService implements EdgeInferenceService {
   /// the English-only L6 after the bilingual corpus calibration showed
   /// L6 cannot separate Russian at all (see RingMatcher threshold doc).
   OnnxEmbeddingService({
-    this.modelAsset = 'assets/models/minilm_multilingual_trimmed_v1.onnx',
+    this.modelAsset = 'assets/models/minilm_multilingual_trimmed_v2.onnx',
     this.vocabAsset = 'assets/models/xlmr_vocab_trimmed_v1.tsv',
     this.tokenizerKind = EmbeddingTokenizerKind.sentencePieceUnigram,
     this.maxTokens = 256,
@@ -65,13 +71,30 @@ class OnnxEmbeddingService implements EdgeInferenceService {
       EmbeddingTokenizerKind.sentencePieceUnigram =>
         SentencePieceUnigramTokenizer(vocabLines),
     };
-    final session =
-        await OnnxRuntime().createSessionFromAsset(modelAsset);
+    // Web: hand onnxruntime-web a Blob URL built from the bundle bytes —
+    // independent of how the hosting page maps asset paths. Native: the
+    // plugin's own extraction path (with its by-name cache, hence the
+    // versioned asset file names).
+    final OrtSession session;
+    if (kIsWeb) {
+      final bytes = (await rootBundle.load(modelAsset)).buffer.asUint8List();
+      final url = await blobUrlFromBytes(bytes);
+      if (url == null) {
+        throw StateError('Blob URL creation unavailable on this platform');
+      }
+      try {
+        session = await OnnxRuntime().createSession(url);
+      } finally {
+        revokeBlobUrl(url);
+      }
+    } else {
+      session = await OnnxRuntime().createSessionFromAsset(modelAsset);
+    }
     _session = session;
     try {
       _inputNames = session.inputNames;
     } on Object {
-      _inputNames = const []; // Older platforms: assume the BERT trio.
+      _inputNames = const []; // Platforms without input introspection.
     }
 
     // One throwaway inference: graph initialization and allocator setup
@@ -97,16 +120,16 @@ class OnnxEmbeddingService implements EdgeInferenceService {
     final length = ids.length;
     final shape = [1, length];
 
+    // Int32 on every platform — the exported graph casts internally
+    // (see header). Int32List is dart2js-safe, unlike Int64List.
     final inputs = <String, OrtValue>{
       'input_ids':
-          await OrtValue.fromList(Int64List.fromList(ids), shape),
+          await OrtValue.fromList(Int32List.fromList(ids), shape),
       'attention_mask': await OrtValue.fromList(
-          Int64List.fromList(List.filled(length, 1)), shape),
-      'token_type_ids': await OrtValue.fromList(
-          Int64List.fromList(List.filled(length, 0)), shape),
+          Int32List.fromList(List.filled(length, 1)), shape),
     };
-    // Models exported without token_type_ids reject unknown inputs —
-    // trim to the session's declared names when the platform exposes them.
+    // Defensive: if a platform ever reports a different input surface,
+    // trim to the session's declared names.
     if (_inputNames.isNotEmpty) {
       inputs.removeWhere((name, _) => !_inputNames.contains(name));
     }
