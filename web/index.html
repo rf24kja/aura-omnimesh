@@ -35,9 +35,19 @@
 <body>
   <!-- ONNX Runtime Web, vendored (local-first: zero external requests).
        Must load BEFORE the Flutter bootstrap — flutter_onnxruntime's web
-       plugin binds to window.ort at startup. The .wasm resolves relative
-       to this script's own directory. -->
+       plugin binds to window.ort at startup. -->
   <script src="ort/ort.min.js"></script>
+  <script>
+    // Resolve wasm/mjs from our vendored directory (no CDN at runtime),
+    // and pin single-threaded: a static host does not send the COOP/COEP
+    // headers SharedArrayBuffer (threaded wasm) requires, and one thread
+    // is plenty for on-demand sentence embedding.
+    if (window.ort) {
+      ort.env.wasm.wasmPaths =
+          new URL('ort/', document.baseURI).toString();
+      ort.env.wasm.numThreads = 1;
+    }
+  </script>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader

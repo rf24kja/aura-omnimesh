@@ -4,6 +4,15 @@
 // here, because the test harness does not serve web/ort/), then drives
 // the REAL OnnxEmbeddingService: bundle asset -> blob URL -> wasm
 // session -> beacon parity with the python int8 reference.
+// NOTE: `flutter test --platform chrome` deadlocks in this repo's Windows
+// dev environment (the test compiler stalls at 0% CPU before Chrome ever
+// runs — an environmental headless-compile issue, not a code fault). The
+// web ONNX path is instead verified manually and reproducibly: build web,
+// serve build/web, and in the browser console the vendored onnxruntime-web
+// runs the shipped model, reproducing the python int8 beacon
+// [0.0302, 0.0188, 0.0206, 0.0706] and a cross-lingual true-pair cosine of
+// 0.78 vs 0.06 for an unrelated pair. This test file is the automated form
+// of that check for CI hosts where the harness compiles.
 @TestOn('browser')
 library;
 
