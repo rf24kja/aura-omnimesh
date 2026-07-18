@@ -222,4 +222,35 @@ void main() {
     await sub.cancel();
     await ws.close();
   });
+
+  test('hostile frames do not crash the bridge; it keeps serving', () async {
+    // Blast the server with malformed input from one socket.
+    final (bad, _) = await connect();
+    for (final garbage in <String>[
+      'not json at all',
+      '[]', // valid json, wrong shape
+      '{"type":"helloChallenge"}', // missing nonce
+      '{"type":"helloChallenge","nonce":"zz","node":{}}', // bad hex nonce
+      '{"type":"broadcast","logs":[{"txId":1}]}', // greeted-gate + bad log
+      '{"type":"unknownFuture","x":1}', // unknown type
+      jsonEncode({'type': 'syncRequest', 'afterClock': 'not-an-int'}),
+    ]) {
+      bad.add(garbage);
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    await bad.close();
+
+    // A well-behaved client must still complete a handshake afterward.
+    final (good, frames) = await connect();
+    good.add(jsonEncode({
+      'type': 'helloChallenge',
+      'nonce': encodeHex(randomNonce()),
+      'node': {'publicKey': 'ef' * 32, 'alias': 'survivor'},
+    }));
+    final hello = await frames
+        .firstWhere((f) => f['type'] == 'helloResponse')
+        .timeout(const Duration(seconds: 5));
+    expect(hello['publicKey'], coreSigner.publicKeyHex);
+    await good.close();
+  });
 }
