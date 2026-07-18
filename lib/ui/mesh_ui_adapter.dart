@@ -14,7 +14,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart'
-    show ValueListenable, ValueNotifier;
+    show ValueListenable, ValueNotifier, visibleForTesting;
 
 import '../crypto/ed25519_signer.dart'
     show crdtSignaturePreimage, secureUuidV4;
@@ -377,6 +377,11 @@ class MeshUiAdapter {
     _debounce?.cancel();
     _debounce = Timer(_kRematchDebounce, () => unawaited(_rematch()));
   }
+
+  /// Runs one rematch synchronously — for tests that mutate the log
+  /// directly (bypassing the debounced onNewDeltasPersisted signal).
+  @visibleForTesting
+  Future<void> rematchForTest() => _rematch();
 
   Future<void> _rematch() async {
     if (_disposed) return;
