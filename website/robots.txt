@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://aura-omnimesh.pages.dev/sitemap.xml

@@ -1,0 +1,14 @@
+# Cloudflare Pages headers (https://developers.cloudflare.com/pages/configuration/headers/)
+# The site is a single self-contained static page — zero external requests,
+# so the CSP can be strict. 'unsafe-inline' is required for the inlined
+# <style> and the JSON-LD/SVG; no external script/style/img is allowed.
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: geolocation=(), camera=(), microphone=(), interest-cohort=()
+  Content-Security-Policy: default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+
+# Long-cache immutable-ish assets; HTML stays revalidated so edits ship fast.
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
