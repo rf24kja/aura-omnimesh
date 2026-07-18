@@ -192,7 +192,15 @@ Future<AppServices> bootstrap() async {
   // which is the acceptable failure direction.
   EdgeInferenceService inference;
   String inferenceLabel;
-  final onnx = OnnxEmbeddingService();
+  // Web deploys that strip the bundled model (Cloudflare Pages 25 MB/file
+  // cap) pass its runtime URL here at build time:
+  //   flutter build web --dart-define=AURA_WEB_MODEL_URL=<https url>
+  // Empty by default → the model is read from the bundle (native always;
+  // self-hosted web too).
+  const webModelUrl = String.fromEnvironment('AURA_WEB_MODEL_URL');
+  final onnx = OnnxEmbeddingService(
+    webModelUrl: webModelUrl.isEmpty ? null : webModelUrl,
+  );
   try {
     await onnx.warmUp();
     inference = onnx;

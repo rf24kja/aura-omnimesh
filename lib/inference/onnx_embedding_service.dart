@@ -47,11 +47,22 @@ class OnnxEmbeddingService implements EdgeInferenceService {
     this.vocabAsset = 'assets/models/xlmr_vocab_trimmed_v1.tsv',
     this.tokenizerKind = EmbeddingTokenizerKind.sentencePieceUnigram,
     this.maxTokens = 256,
+    this.webModelUrl,
   });
 
   final String modelAsset;
   final String vocabAsset;
   final EmbeddingTokenizerKind tokenizerKind;
+
+  /// WEB ONLY: when set, the 76 MB model is fetched from this URL at
+  /// runtime by onnxruntime-web instead of being read from the asset
+  /// bundle. This keeps the deployed web build small — Cloudflare Pages
+  /// caps files at 25 MB, so the model cannot ship inside the bundle
+  /// there. The URL host must send permissive CORS (GitHub release
+  /// assets do). Null / empty → fall back to the bundled asset (works
+  /// for self-hosted deploys with no per-file size limit). The vocab
+  /// (4.3 MB) always stays bundled — it fits everywhere.
+  final String? webModelUrl;
 
   /// Context window incl. [CLS]/[SEP]; longer input is truncated by the
   /// tokenizer, never an error (interface contract).
@@ -71,23 +82,31 @@ class OnnxEmbeddingService implements EdgeInferenceService {
       EmbeddingTokenizerKind.sentencePieceUnigram =>
         SentencePieceUnigramTokenizer(vocabLines),
     };
-    // Web: hand onnxruntime-web a Blob URL built from the bundle bytes —
-    // independent of how the hosting page maps asset paths. Native: the
-    // plugin's own extraction path (with its by-name cache, hence the
-    // versioned asset file names).
     final OrtSession session;
     if (kIsWeb) {
-      final bytes = (await rootBundle.load(modelAsset)).buffer.asUint8List();
-      final url = await blobUrlFromBytes(bytes);
-      if (url == null) {
-        throw StateError('Blob URL creation unavailable on this platform');
-      }
-      try {
+      final url = webModelUrl;
+      if (url != null && url.isNotEmpty) {
+        // Fetch-by-URL: onnxruntime-web downloads the model itself. Keeps
+        // the deployed bundle small (Pages 25 MB/file cap).
         session = await OnnxRuntime().createSession(url);
-      } finally {
-        revokeBlobUrl(url);
+      } else {
+        // Bundled: hand onnxruntime-web a Blob URL built from the asset
+        // bytes — independent of how the hosting page maps asset paths.
+        final bytes =
+            (await rootBundle.load(modelAsset)).buffer.asUint8List();
+        final blobUrl = await blobUrlFromBytes(bytes);
+        if (blobUrl == null) {
+          throw StateError('Blob URL creation unavailable on this platform');
+        }
+        try {
+          session = await OnnxRuntime().createSession(blobUrl);
+        } finally {
+          revokeBlobUrl(blobUrl);
+        }
       }
     } else {
+      // Native: the plugin's own extraction path (with its by-name cache,
+      // hence the versioned asset file names).
       session = await OnnxRuntime().createSessionFromAsset(modelAsset);
     }
     _session = session;
