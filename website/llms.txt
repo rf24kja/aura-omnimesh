@@ -1,0 +1,27 @@
+# Aura OmniMesh
+
+> A local-first, serverless peer-to-peer exchange protocol. Phones discover
+> each other over Bluetooth / local Wi-Fi / LAN, publish signed barter
+> intents ("offer: guitar lessons", "need: help moving"), and an on-device
+> multilingual ML model (MiniLM) finds closed multilateral barter rings —
+> A gives to B, B to C, C back to A — with no internet, no servers, no
+> accounts, and no tokens.
+
+## Key facts
+- Zero servers by design: all state lives in an embedded on-device database;
+  devices sync via CRDT operation logs signed with per-device Ed25519 keys.
+- Multilingual semantic matching (English + Russian) runs fully on-device;
+  published text never reaches any third party service.
+- Ring lifecycle: discover -> lock (every participant signs) -> confirmed ->
+  fulfilled; withdrawal breaks the ring visibly for everyone.
+- Reputation is computed locally from signed completed-exchange history and
+  is never accepted from the wire.
+- Platforms: Android, iOS, and a web PWA light client that pairs with a
+  nearby core node via QR code over the LAN.
+- Free, no ads, no analytics, no payment processing. Version 1 is pure
+  barter of goods, services, and time.
+
+## Pages
+- / : product overview, how it works, FAQ
+- /privacy.html : privacy policy (EN/RU) — nothing is collected
+- /terms.html : terms of service (EN/RU) — discovery tool, not a broker

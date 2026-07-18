@@ -1,4 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- LAN sockets: the Core Node bridge server (dart:io HttpServer) and
+         the web/light-client WebSocket transport. Required in the MAIN
+         manifest — Flutter only injects INTERNET into the debug manifest
+         for hot reload, so release builds silently lose all networking
+         without this line. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Ring lifecycle notifications (API 33+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 

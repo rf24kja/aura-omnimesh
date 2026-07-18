@@ -1,4 +1,11 @@
+# Large binary assets tracked via Git LFS (model weights, wasm runtime).
 *.onnx filter=lfs diff=lfs merge=lfs -text
 *.wasm filter=lfs diff=lfs merge=lfs -text
 assets/models/xlmr_vocab_trimmed_v1.tsv filter=lfs diff=lfs merge=lfs -text
+# Normalize line endings for text so the repo is stable across OSes.
+*.dart text eol=lf
+*.md text eol=lf
+*.yaml text eol=lf
+*.kt text eol=lf
+*.swift text eol=lf
 assets/models/xlmr_unigram_vocab.tsv filter=lfs diff=lfs merge=lfs -text

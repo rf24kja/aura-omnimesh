@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Aura OmniMesh</title>
+<meta name="description" content="Aura OmniMesh privacy policy: no servers, no accounts, nothing collected. Data leaves your device only when you publish it to nearby peers.">
+<style>
+  :root{--bg:#111111;--carbon:#181818;--type:#ffffff;--dim:rgba(255,255,255,.7);
+        --slate:#777777;--s2:16px;--s3:24px;--s4:32px;--s5:48px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--type);
+       font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .pad{max-width:720px;margin:0 auto;padding:var(--s5) var(--s3)}
+  h1{font-size:24px;font-weight:600;letter-spacing:-.3px;margin-bottom:var(--s2)}
+  h2{font-size:12px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;
+     color:var(--slate);margin:var(--s4) 0 var(--s2)}
+  p,li{color:var(--dim);margin-bottom:var(--s2)}
+  strong{color:var(--type);font-weight:600}
+  ul{list-style:none}
+  li{border-left:2px solid var(--slate);padding-left:var(--s2)}
+  a{color:var(--type)}
+  .lang{border-top:1px solid var(--slate);margin-top:var(--s5);padding-top:var(--s4)}
+  footer{border-top:1px solid var(--slate);margin-top:var(--s5);padding-top:var(--s3);
+         font-size:12px;color:var(--slate)}
+  footer a{color:var(--slate)}
+</style>
+</head>
+<body>
+<div class="pad">
+  <h1>Privacy Policy</h1>
+  <p><strong>The short version: your data never leaves your device unless you
+  explicitly publish it to nearby peers. We run no servers and collect
+  nothing.</strong> Last updated: 2026-07.</p>
+
+  <h2>No accounts</h2>
+  <p>Your identity is an Ed25519 key pair generated on your device and stored
+  in the platform secure enclave (Keychain / Android Keystore). We never see it.</p>
+
+  <h2>No servers</h2>
+  <p>The app exchanges data directly between devices over Bluetooth, local
+  Wi-Fi, and LAN WebSocket links. There is no backend, no cloud, no analytics,
+  no crash reporting, no advertising SDKs.</p>
+
+  <h2>What peers receive</h2>
+  <p>When you publish an offer or a need, its text, a numeric embedding of that
+  text, your public key, and your chosen alias are shared with mesh peers in
+  your vicinity — that is the entire purpose of the app. Ring negotiation
+  records (lock / fulfil / withdraw operations signed by your key) are likewise
+  shared. Publish only what you are comfortable showing to people near you.</p>
+
+  <h2>What stays local</h2>
+  <p>The full exchange history, your reputation scores for peers, telemetry
+  readings (battery, thermal, Wi-Fi name), and the ML model run entirely on the
+  device. Semantic matching is computed on-device; text is never sent to any
+  third party.</p>
+
+  <h2>Permissions</h2>
+  <p>Location, Bluetooth, and Nearby Wi-Fi permissions exist solely because the
+  operating system requires them for local radio discovery (and, on iOS, to
+  read the current Wi-Fi name for the compute-trust gate). No location
+  coordinates are read, stored, or transmitted.</p>
+
+  <h2>Deletion</h2>
+  <p>Uninstalling the app destroys the local database and the key material.
+  Peers retain the operations you previously published to them, exactly like a
+  message you already sent.</p>
+
+  <div class="lang">
+  <h1>Политика конфиденциальности</h1>
+  <p><strong>Коротко: ваши данные не покидают устройство, пока вы сами не
+  опубликуете их ближайшим участникам. Серверов у нас нет, мы ничего не
+  собираем.</strong> Обновлено: июль 2026.</p>
+
+  <h2>Без аккаунтов</h2>
+  <p>Ваша личность — пара ключей Ed25519, созданная на устройстве и хранимая в
+  защищённом хранилище платформы (Keychain / Android Keystore). Мы её не видим.</p>
+
+  <h2>Без серверов</h2>
+  <p>Приложение обменивается данными напрямую между устройствами по Bluetooth,
+  локальному Wi-Fi и WebSocket в локальной сети. Нет бэкенда, облака,
+  аналитики, крэш-репортов, рекламных SDK.</p>
+
+  <h2>Что получают участники</h2>
+  <p>Публикуя предложение или потребность, вы делитесь с участниками меша
+  поблизости: текстом, числовым векторным представлением текста, своим
+  публичным ключом и выбранным псевдонимом — в этом и состоит назначение
+  приложения. Записи переговоров по кольцу (операции lock / fulfil / withdraw,
+  подписанные вашим ключом) распространяются так же. Публикуйте только то, что
+  готовы показать людям рядом.</p>
+
+  <h2>Что остаётся локально</h2>
+  <p>Полная история обменов, ваши оценки надёжности участников, телеметрия
+  (батарея, температура, имя Wi-Fi) и ML-модель работают целиком на устройстве.
+  Семантический подбор выполняется на устройстве; текст никогда не отправляется
+  третьим сторонам.</p>
+
+  <h2>Разрешения</h2>
+  <p>Доступ к геолокации, Bluetooth и Nearby Wi-Fi нужен исключительно потому,
+  что операционная система требует их для локального радиообнаружения (а на iOS
+  — для чтения имени текущей Wi-Fi-сети). Координаты местоположения не
+  читаются, не хранятся и не передаются.</p>
+
+  <h2>Удаление</h2>
+  <p>Удаление приложения уничтожает локальную базу данных и ключи. У участников
+  остаются операции, которые вы им уже опубликовали, — ровно как уже
+  отправленное сообщение.</p>
+  </div>
+
+  <footer>
+    <a href="index.html">Aura OmniMesh</a> · <a href="terms.html">Terms</a> ·
+    Contact: <a href="mailto:rf24krsk@gmail.com">rf24krsk@gmail.com</a>
+  </footer>
+</div>
+</body>
+</html>
