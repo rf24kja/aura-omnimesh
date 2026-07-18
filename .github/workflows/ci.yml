@@ -27,6 +27,11 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Model weights + wasm live in Git LFS. Without this, checkout
+          # leaves pointer files and the build bundles broken assets
+          # (ONNX silently falls back to the FNV surrogate).
+          lfs: true
 
       - uses: actions/setup-java@v4
         with:

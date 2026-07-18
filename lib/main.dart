@@ -855,99 +855,182 @@ class _StatusStrip extends StatelessWidget {
 
 /// Serverless diagnostics (ROADMAP Phase 3): the only window into mesh
 /// health when there is no backend to query. Counters are read live on
-/// open — a StatefulBuilder REFRESH re-reads them without reopening.
-class _DiagnosticsDialog extends StatelessWidget {
+/// each rebuild (REFRESH), and the alias is editable here — the one
+/// post-onboarding place to rename this node.
+class _DiagnosticsDialog extends StatefulWidget {
   const _DiagnosticsDialog({required this.services});
 
   final AppServices services;
 
   @override
+  State<_DiagnosticsDialog> createState() => _DiagnosticsDialogState();
+}
+
+class _DiagnosticsDialogState extends State<_DiagnosticsDialog> {
+  static const _storage = FlutterSecureStorage();
+  static const int _maxAliasLength = 24;
+
+  late final TextEditingController _alias =
+      TextEditingController(text: widget.services.selfIdentity.localAlias);
+  bool _savingAlias = false;
+  bool _aliasSaved = false;
+
+  @override
+  void dispose() {
+    _alias.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveAlias() async {
+    final next = _alias.text.trim();
+    if (next.isEmpty ||
+        _savingAlias ||
+        next == widget.services.selfIdentity.localAlias) {
+      return;
+    }
+    setState(() => _savingAlias = true);
+    await _storage.write(key: kAliasStorageKey, value: next);
+    // selfIdentity is the SAME NodeIdentity instance the engine and the
+    // bridge hold, so mutating localAlias updates every reader; persist
+    // the row too. New handshakes and gossip carry the new alias; peers
+    // already connected keep the old one until they reconnect (fine for
+    // v1 — no forced re-announce).
+    widget.services.selfIdentity.localAlias = next;
+    await widget.services.repository
+        .upsertNodeIdentity(widget.services.selfIdentity);
+    if (!mounted) return;
+    setState(() {
+      _savingAlias = false;
+      _aliasSaved = true;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final labelStyle = _StatusStrip._labelStyle;
+    final services = widget.services;
+    final mesh = services.adapter.state.value;
+    final materializer = services.materializer;
+    final rows = <(String, String)>[
+      ('PUBLIC KEY', services.signer.publicKeyHex),
+      ('MESH', switch (mesh.connectionState) {
+        MeshConnectionState.disconnected => 'OFFLINE',
+        MeshConnectionState.connecting => 'SEARCHING',
+        MeshConnectionState.secureBridge => 'SECURE',
+      }),
+      ('VERIFIED PEERS', '${mesh.activePeersCount}'),
+      ('LAMPORT CLOCK', '${mesh.localClock}'),
+      ('SYNC', mesh.syncStatus.name),
+      ('INFERENCE', services.inferenceLabel),
+      ('FOLDS', '${materializer.totalFolds}'),
+      ('OPS APPLIED', '${materializer.totalApplied}'),
+      ('REJECTED · SIG', '${materializer.totalRejectedSignatures}'),
+      ('REJECTED · RULE', '${materializer.totalRejectedRule}'),
+      ('BRIDGE', services.bridge == null ? '—' : 'HOSTING'),
+      ('LAST ERROR', mesh.lastError ?? '—'),
+    ];
     return Dialog(
       backgroundColor: _canvas,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
         side: BorderSide(color: _border, width: 1),
       ),
-      child: StatefulBuilder(
-        builder: (context, setState) {
-          final mesh = services.adapter.state.value;
-          final materializer = services.materializer;
-          final rows = <(String, String)>[
-            ('ALIAS', services.selfIdentity.localAlias),
-            (
-              'PUBLIC KEY',
-              services.signer.publicKeyHex,
-            ),
-            ('MESH', switch (mesh.connectionState) {
-              MeshConnectionState.disconnected => 'OFFLINE',
-              MeshConnectionState.connecting => 'SEARCHING',
-              MeshConnectionState.secureBridge => 'SECURE',
-            }),
-            ('VERIFIED PEERS', '${mesh.activePeersCount}'),
-            ('LAMPORT CLOCK', '${mesh.localClock}'),
-            ('SYNC', mesh.syncStatus.name),
-            ('INFERENCE', services.inferenceLabel),
-            ('FOLDS', '${materializer.totalFolds}'),
-            ('OPS APPLIED', '${materializer.totalApplied}'),
-            ('REJECTED · SIG', '${materializer.totalRejectedSignatures}'),
-            ('REJECTED · RULE', '${materializer.totalRejectedRule}'),
-            ('BRIDGE', services.bridge == null ? '—' : 'HOSTING'),
-            ('LAST ERROR', mesh.lastError ?? '—'),
-          ];
-          return Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('DIAGNOSTICS', style: labelStyle),
+            const SizedBox(height: 16),
+
+            // Editable alias — the one post-onboarding rename surface.
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text('DIAGNOSTICS', style: labelStyle),
-                const SizedBox(height: 16),
-                for (final (k, v) in rows)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 150,
-                          child: Text(k, style: labelStyle),
-                        ),
-                        Expanded(
-                          child: Text(
-                            v,
-                            style: const TextStyle(
-                              color: _type,
-                              fontSize: 12,
-                              fontFeatures: [FontFeature.tabularFigures()],
-                            ),
-                          ),
-                        ),
-                      ],
+                SizedBox(width: 150, child: Text('ALIAS', style: labelStyle)),
+                Expanded(
+                  child: TextField(
+                    controller: _alias,
+                    enabled: !_savingAlias,
+                    cursorColor: AuraColors.type,
+                    cursorWidth: 2,
+                    style: const TextStyle(color: _type, fontSize: 13),
+                    maxLength: _maxAliasLength,
+                    onChanged: (_) {
+                      if (_aliasSaved) setState(() => _aliasSaved = false);
+                    },
+                    onSubmitted: (_) => _saveAlias(),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      counterText: '',
+                      contentPadding: EdgeInsets.symmetric(vertical: 4),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                            color: AuraColors.hairline,
+                            width: AuraStroke.hair),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                            color: AuraColors.type, width: AuraStroke.hair),
+                      ),
                     ),
                   ),
-                const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: () => setState(() {}),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration:
-                          const BoxDecoration(border: Border.fromBorderSide(
-                        BorderSide(color: _border, width: 1),
-                      )),
-                      child: Text('REFRESH',
-                          style: labelStyle.copyWith(color: _type)),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: _saveAlias,
+                  child: Text(
+                    _savingAlias ? '…' : (_aliasSaved ? 'SAVED' : 'SAVE'),
+                    style: labelStyle.copyWith(
+                      color: _aliasSaved ? AuraColors.emerald : _type,
                     ),
                   ),
                 ),
               ],
             ),
-          );
-        },
+            const SizedBox(height: 6),
+
+            for (final (k, v) in rows)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(width: 150, child: Text(k, style: labelStyle)),
+                    Expanded(
+                      child: Text(
+                        v,
+                        style: const TextStyle(
+                          color: _type,
+                          fontSize: 12,
+                          fontFeatures: [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerRight,
+              child: GestureDetector(
+                onTap: () => setState(() {}),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8),
+                  decoration: const BoxDecoration(
+                    border: Border.fromBorderSide(
+                      BorderSide(color: _border, width: 1),
+                    ),
+                  ),
+                  child: Text('REFRESH',
+                      style: labelStyle.copyWith(color: _type)),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
