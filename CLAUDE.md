@@ -1,7 +1,12 @@
 # CLAUDE.md — Aura OmniMesh
 
 Local-first P2P exchange protocol. Flutter (iOS/Android/Web PWA), zero servers.
-Full plan: ROADMAP.md. Current phase: **Phase 0 — make everything compile.**
+Full plan: ROADMAP.md. Current status: **Phases 0–3 complete — v1.0 (Module A
+FluidMesh) is feature-complete; signed AAB/APK built, 112-test suite green,
+`flutter analyze` clean.** Remaining work is release publication (GitHub
+release, Cloudflare Pages, Play Console) + on-device radio field testing — see
+the status banner at the top of ROADMAP.md. iOS build deferred until a Mac is
+available.
 
 ## Commands
 ```bash
