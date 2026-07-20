@@ -68,6 +68,31 @@ Being honest about non-goals is part of the security posture:
   outside what an app can defend.
 - **iOS.** Not yet shipped; the iOS build path is prepared but unaudited on device.
 
+## Verifying an Android build
+
+The APK published on the releases page is signed with the project release
+key. Because it is installed outside Google Play, verify the signing
+certificate before trusting a download — this is what proves the file came
+from this project and was not tampered with in transit.
+
+Run, against the file you downloaded:
+
+```
+apksigner verify --print-certs app-release.apk
+```
+
+and confirm the SHA-256 digest matches:
+
+```
+Signer #1 certificate DN:     CN=Aura OmniMesh, OU=Development, O=Aura OmniMesh
+Signer #1 certificate SHA-256: b5af06c679460f9424d0fc14de46ed0b686c58ed96d359cbcb9503c07ad85eab
+Signer #1 certificate SHA-1:   1bd152fbda524bb6ed4aa841fcdbb3d9b78dcd44
+```
+
+A mismatch means the build is not ours — do not install it. (The certificate
+carries a development Organizational Unit; the key itself is the release key
+and is what matters for continuity across updates.)
+
 ## Supported versions
 
 Pre-1.0/early-1.0. Only the latest `main` and the most recent published release

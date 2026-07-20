@@ -379,16 +379,18 @@
         <div class="store">
           <span class="label">iOS</span>
           <h3>iPhone &amp; iPad</h3>
-          <p>Full mesh node: radio discovery over Multipeer, local database, and
-          the bridge that lets web clients join your room.</p>
-          <a class="btn primary" href="#" rel="noopener">App&nbsp;Store</a>
+          <p>Full mesh node over Multipeer is built and ready, but not yet
+          published — an iOS release must be built and signed on a Mac. Watch
+          the repository for the TestFlight and App&nbsp;Store rollout.</p>
+          <a class="btn" href="https://github.com/rf24kja/aura-omnimesh"
+             rel="noopener">Follow&nbsp;on&nbsp;GitHub</a>
         </div>
         <div class="store">
           <span class="label">Android</span>
           <h3>Phones &amp; tablets</h3>
           <p>Full mesh node over Nearby Connections. Install the signed APK
           directly — tap the file, then allow install from unknown sources
-          when your phone asks. Google Play listing coming soon.</p>
+          when your phone asks. No store account, no gatekeeper.</p>
           <a class="btn primary"
              href="https://github.com/rf24kja/aura-omnimesh/releases/download/v1.0.0/app-release.apk"
              rel="noopener">Download&nbsp;APK</a>
@@ -403,8 +405,10 @@
       </div>
       <p class="fineprint">iOS apps install only through the App Store — that is
       an Apple platform rule, not our choice. The direct APK is signed with our
-      release key; verify the fingerprint published in the repository before
-      installing from outside Google Play.</p>
+      release key; before installing, verify the certificate SHA-256 with
+      <code>apksigner verify --print-certs</code> against the fingerprint in
+      <a href="https://github.com/rf24kja/aura-omnimesh/blob/main/SECURITY.md"
+      rel="noopener">SECURITY.md</a>.</p>
     </div>
   </section>
 
