@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="uk" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Про Aura OmniMesh — бартерний протокол без серверів, local-first</title>
+<meta name="description" content="Що таке Aura OmniMesh, навіщо він створений і як працює: відкритий протокол, що знаходить багатосторонні бартерні кільця між телефонами поруч — без серверів, без акаунтів, без інтернету.">
+<link rel="canonical" href="https://aura-omnimesh.pages.dev/about/uk/">
+<link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/">
+<link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/">
+<link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/">
+<link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/">
+<link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/">
+<link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/">
+<link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/">
+<link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/">
+<link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/">
+<link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/">
+<link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Про Aura OmniMesh — бартерний протокол без серверів, local-first">
+<meta property="og:description" content="Що таке Aura OmniMesh, навіщо він створений і як працює: відкритий протокол, що знаходить багатосторонні бартерні кільця між телефонами поруч — без серверів, без акаунтів, без інтернету.">
+<meta property="og:url" content="https://aura-omnimesh.pages.dev/about/uk/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#111111">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "AboutPage",
+ "name": "Про Aura OmniMesh — бартерний протокол без серверів, local-first",
+ "description": "Що таке Aura OmniMesh, навіщо він створений і як працює: відкритий протокол, що знаходить багатосторонні бартерні кільця між телефонами поруч — без серверів, без акаунтів, без інтернету.",
+ "inLanguage": "uk",
+ "url": "https://aura-omnimesh.pages.dev/about/uk/",
+ "isPartOf": {
+  "@type": "WebSite",
+  "name": "Aura OmniMesh",
+  "url": "https://aura-omnimesh.pages.dev/"
+ }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "inLanguage": "uk",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "Це безкоштовно?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Так — безкоштовно й з відкритим кодом, без реклами і без будь-чого на продаж. Серверів, які треба утримувати, немає, тож монетизувати нічого."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Які мови розуміє підбір?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Модель на пристрої багатомовна: пропозиція однією мовою може збігтися з потребою іншою. Сьогодні перевірені англійська та російська; родина моделей покриває десятки мов."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Чи можна побудувати на протоколі щось своє?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Так. Шари — транспорт, підписаний CRDT-журнал, семантичний матчер — розділювані, а вихідний код відкритий на GitHub у репозиторії проєкту."
+   }
+  }
+ ]
+}
+</script>
+<style>
+  :root{--obsidian:#111111;--carbon:#181818;--type:#ffffff;
+    --dim:rgba(255,255,255,.70);--slate:#777777;--hair:rgba(119,119,119,.25);
+    --emerald:#2FBF71;--s1:8px;--s2:16px;--s3:24px;--s4:32px;--s5:48px;--s6:96px;
+    --maxw:960px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--obsidian);color:var(--type);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",
+    "Noto Sans","Noto Sans KR","Noto Sans SC","Noto Sans JP","Noto Sans Devanagari",
+    Arial,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  ::selection{background:rgba(255,255,255,.2)}
+  a{color:var(--type)}
+  .rail{max-width:var(--maxw);margin:0 auto;
+    border-left:1px solid var(--slate);border-right:1px solid var(--slate)}
+  @media (max-width:1000px){.rail{border-left:0;border-right:0}}
+  .pad{padding-left:var(--s3);padding-right:var(--s3)}
+  .label{font-size:11px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--slate)}
+  nav{border-bottom:1px solid var(--slate);position:sticky;top:0;
+    background:var(--obsidian);z-index:10}
+  .nav-row{display:flex;align-items:center;justify-content:space-between;
+    padding-top:var(--s2);padding-bottom:var(--s2)}
+  .wordmark{font-size:13px;font-weight:600;letter-spacing:.18em;text-decoration:none}
+  nav .label a{color:var(--slate);text-decoration:none}
+  nav .label a:hover{color:var(--type)}
+  header.about{padding-top:var(--s5);padding-bottom:var(--s4)}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.1;font-weight:600;
+    letter-spacing:-0.02em;margin:var(--s3) 0}
+  .lede{color:var(--dim);max-width:60ch}
+  section.sec{border-top:1px solid var(--hair);
+    padding-top:var(--s4);padding-bottom:var(--s4)}
+  h2{font-size:21px;font-weight:600;letter-spacing:-0.01em;margin:var(--s2) 0 var(--s2)}
+  .sec p{color:var(--dim);max-width:66ch;margin-bottom:var(--s2)}
+  ol.steps{list-style:none;counter-reset:st;max-width:66ch}
+  ol.steps li{counter-increment:st;border-left:2px solid var(--emerald);
+    padding:2px 0 2px var(--s2);margin-bottom:var(--s3)}
+  ol.steps li::before{content:counter(st,decimal-leading-zero);
+    font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--slate);display:block}
+  ol.steps strong{display:block;margin:2px 0 4px}
+  ol.steps span{color:var(--dim)}
+  ul.plain{list-style:none;max-width:66ch}
+  ul.plain li{padding-left:var(--s2);margin-bottom:var(--s1);
+    border-left:1px solid var(--slate);color:var(--dim)}
+  ul.plain li strong{color:var(--type)}
+  details{border-top:1px solid var(--hair);max-width:66ch}
+  details:last-of-type{border-bottom:1px solid var(--hair)}
+  summary{cursor:pointer;padding:var(--s2) 0;font-weight:500;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";float:right;color:var(--slate)}
+  details[open] summary::after{content:"\2212"}
+  details p{color:var(--dim);padding-bottom:var(--s2)}
+  .langs{display:flex;flex-wrap:wrap;gap:var(--s1) var(--s2);max-width:66ch}
+  .langs a{color:var(--slate);text-decoration:none;font-size:13px}
+  .langs a:hover{color:var(--type)}
+  .langs a[aria-current]{color:var(--type);border-bottom:1px solid var(--emerald)}
+  footer{border-top:1px solid var(--slate);padding-top:var(--s4);padding-bottom:var(--s5)}
+  footer .pad{display:flex;justify-content:space-between;gap:var(--s2);
+    flex-wrap:wrap;color:var(--slate);font-size:13px}
+  footer a{color:var(--slate);text-decoration:none}
+  footer a:hover{color:var(--type)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="rail pad nav-row">
+    <a class="wordmark" href="/">AURA&nbsp;OMNIMESH</a>
+    <span class="label"><a href="/">Головна</a></span>
+  </div>
+</nav>
+
+<div class="rail">
+  <header class="about pad">
+    <span class="label">Про проєкт</span>
+    <h1>Обмін без інфраструктури.</h1>
+    <p class="lede">Aura OmniMesh — відкритий local-first протокол обміну. Телефони в одній кімнаті знаходять одне одного, публікують підписані пропозиції та потреби і збирають замкнені бартерні кільця — цикли, де кожен віддає одне й отримує інше. Без серверів, без акаунтів, без інтернету.</p>
+  </header>
+
+  <main>
+    <section class="sec pad">
+      <span class="label">Визначення</span>
+      <h2>Що таке Aura OmniMesh</h2>
+      <p>Aura OmniMesh — це протокол і безкоштовний застосунок для прямого обміну між людьми, які фізично поруч. Кожен пристрій публікує короткі підписані <em>інтенти</em> — пропозицію («навчаю гри на гітарі») або потребу («потрібна допомога з переїздом») — а невелика ШІ-модель, що працює просто на телефоні, зводить їх у замкнені кільця з трьох–семи учасників.</p>
+      <p>Усе, для чого маркетплейсу зазвичай потрібна компанія — ідентичність, підбір, довіра, історія — пристрої роблять самі, криптографічно. У результаті виходить мережа обміну, що продовжує працювати там, де не працюють гроші, банки чи інтернет.</p>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Мотивація</span>
+      <h2>Навіщо він створений</h2>
+      <p>Прямий бартер зазвичай зазнає невдачі з математичної причини: той, хто має потрібне вам, рідко потребує того, що маєте ви. Економісти називають це <em>подвійним збігом потреб</em>. Кільця розв’язують задачу: А навчає Б, Б позичає В, В постачає А — цикл замикається, хоча жодна пара не збігається напряму.</p>
+      <p>Друга причина — незалежність. Будь-який наявний маркетплейс працює на серверах і акаунтах: компанія може вимкнутися, цензурувати оголошення, підняти комісії чи збирати дані. OmniMesh прибирає посередника як архітектурний факт, а не як обіцянку: сервера, якому треба довіряти, який можна вилучити чи вимкнути, просто немає.</p>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Протокол</span>
+      <h2>Як це працює</h2>
+      <ol class="steps">
+      <li><strong>Ідентичність — це ключ, а не акаунт.</strong><span>Під час першого запуску пристрій генерує пару ключів Ed25519. Приватний ключ ніколи не залишає пристрій. Без реєстрації, без пошти, без номера телефону — ваш ключ і є вашою особистістю.</span></li>
+      <li><strong>Інтенти — підписаний текст.</strong><span>Ви публікуєте пропозиції та потреби короткими фразами. Багатомовна мовна модель на телефоні перетворює кожну на семантичний вектор, тому підбір працює між різними мовами.</span></li>
+      <li><strong>Пристрої обмінюються спільним журналом.</strong><span>Телефони поруч обмінюються підписаними журналами операцій через Bluetooth LE, Wi-Fi Direct або спільну локальну мережу. Журнал — це CRDT: не залежить від порядку доставлення й переживає розділення мережі, тож усі пристрої сходяться до одного стану без координатора.</span></li>
+      <li><strong>Усе перевіряється, ніщо не припускається.</strong><span>Кожна операція перевіряється: підпис, авторство, правила протоколу. Валідний підпис під чужим ключем усе одно відхиляється — статус інтенту може змінювати лише його власник. Репутація ніколи не приймається з мережі: кожен пристрій перераховує її локально за підписаними завершеними обмінами.</span></li>
+      <li><strong>Матчер шукає замкнені цикли.</strong><span>Пристрій обходить локальний граф пропозицій і потреб у пошуках кілець із 3–7 учасників. Пошук детермінований: ті самі дані дають ті самі кільця на будь-якому телефоні.</span></li>
+      <li><strong>Кільце фіксується, люди міняються, історія підписана.</strong><span>Кожен учасник фіксує свій крок; коли зафіксовані всі — кільце підтверджене. Люди зустрічаються, міняються і відмічають виконання. Кожен етап — підписана операція: вихід із кільця видимо розриває його для всіх.</span></li>
+      </ol>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Задачі</span>
+      <h2>Які задачі розв’язує</h2>
+      <ul class="plain">
+      <li><strong>Обмін, коли гроші слабкі або недоступні</strong> — інфляція, дефіцит готівки, спільноти без банків.</li>
+      <li><strong>Маркетплейс без комісій, акаунтів і серверів</strong> — нічого платити, ніде реєструватися.</li>
+      <li><strong>Повністю офлайн</strong> — стихійні лиха, знеструмлення, віддалені райони, фестивалі, судна, табори.</li>
+      <li><strong>Приватність за побудовою</strong> — пристрій не залишає нічого, крім того, що ви явно публікуєте сусідам.</li>
+      <li><strong>Багатосторонній підбір</strong> — цикли, які двосторонній бартер математично замкнути не може.</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Аудиторія</span>
+      <h2>Кому це потрібно</h2>
+      <ul class="plain">
+      <li>Районам, селищам і мережам взаємодопомоги, яким потрібна локальна дошка обміну без оператора.</li>
+      <li>Коворкінгам, кампусам, конференціям і фестивалям — щільним просторам, повним взаємодоповнюваних навичок.</li>
+      <li>Спільнотам у зонах лих і знеструмлень, де незалежність від інфраструктури — сама мета.</li>
+      <li>Людям, які не готові віддавати компанії історію своїх обмінів в обмін на сервіс підбору.</li>
+      <li>Дослідникам і розробникам P2P-систем — протокол і код відкриті на GitHub.</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Принципи</span>
+      <h2>Принципи дизайну</h2>
+      <ul class="plain">
+      <li><strong>Local-first.</strong> Дані живуть у вбудованій базі на вашому пристрої. Підписаний журнал — джерело істини; видалення застосунку видаляє дані.</li>
+      <li><strong>Нуль збору.</strong> Ані аналітики, ані телеметрії, ані акаунтів. Серверів компанії, куди можна було б щось надіслати, не існує.</li>
+      <li><strong>Fail-closed.</strong> Усе, що неможливо перевірити, відхиляється — ніколи не вгадується й не припускається.</li>
+      <li><strong>Детермінізм.</strong> Усі пристрої обчислюють однакові кільця з однакових даних; коректність не залежить від того, хто запускає код.</li>
+      <li><strong>Чесність щодо меж.</strong> Протокол прямо документує те, чого він не робить, — нижче.</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Межі</span>
+      <h2>Чим він не є</h2>
+      <ul class="plain">
+      <li>Не платіжна система: без токенів, балансів і кастоді. Версія 1 — чистий бартер товарів, послуг і часу.</li>
+      <li>Не глобальна мережа: радіус обмежений радіо та локальними мережами. Це мережа масштабу району — за задумом.</li>
+      <li>Не захищений від Sybil: ключ може створити будь-хто. Репутація заробляється завершеними кільцями й ніколи не видається.</li>
+      <li>iOS та Android не з’єднуються напряму по радіо (API платформ різні); міжплатформний трафік іде через міст у локальній мережі.</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">FAQ</span>
+      <h2>Часті запитання</h2>
+      <details>
+        <summary>Це безкоштовно?</summary>
+        <p>Так — безкоштовно й з відкритим кодом, без реклами і без будь-чого на продаж. Серверів, які треба утримувати, немає, тож монетизувати нічого.</p>
+      </details>
+      <details>
+        <summary>Які мови розуміє підбір?</summary>
+        <p>Модель на пристрої багатомовна: пропозиція однією мовою може збігтися з потребою іншою. Сьогодні перевірені англійська та російська; родина моделей покриває десятки мов.</p>
+      </details>
+      <details>
+        <summary>Чи можна побудувати на протоколі щось своє?</summary>
+        <p>Так. Шари — транспорт, підписаний CRDT-журнал, семантичний матчер — розділювані, а вихідний код відкритий на GitHub у репозиторії проєкту.</p>
+      </details>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Мови</span>
+      <div class="langs">
+        <a href="/about/" hreflang="en" lang="en">English</a>
+        <a href="/about/es/" hreflang="es" lang="es">Español</a>
+        <a href="/about/hi/" hreflang="hi" lang="hi">हिन्दी</a>
+        <a href="/about/id/" hreflang="id" lang="id">Bahasa Indonesia</a>
+        <a href="/about/ja/" hreflang="ja" lang="ja">日本語</a>
+        <a href="/about/ko/" hreflang="ko" lang="ko">한국어</a>
+        <a href="/about/pt/" hreflang="pt" lang="pt">Português</a>
+        <a href="/about/ru/" hreflang="ru" lang="ru">Русский</a>
+        <a href="/about/uk/" hreflang="uk" lang="uk" aria-current="page">Українська</a>
+        <a href="/about/zh/" hreflang="zh" lang="zh">中文</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="pad">
+      <span>AURA OMNIMESH — local-first протокол обміну. Нуль серверів за задумом.</span>
+      <span>
+        <a href="/privacy.html">Privacy</a> &nbsp;&middot;&nbsp;
+        <a href="/terms.html">Terms</a> &nbsp;&middot;&nbsp;
+        <a href="https://github.com/rf24kja/aura-omnimesh" rel="noopener">GitHub</a>
+      </span>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

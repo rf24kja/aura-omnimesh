@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="zh" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>关于 Aura OmniMesh — 无服务器的本地优先易物协议</title>
+<meta name="description" content="Aura OmniMesh 是什么、为何而生、如何运作：一个开放协议，在附近的手机之间寻找多方易物闭环 — 无服务器、无账号、无需互联网。">
+<link rel="canonical" href="https://aura-omnimesh.pages.dev/about/zh/">
+<link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/">
+<link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/">
+<link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/">
+<link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/">
+<link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/">
+<link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/">
+<link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/">
+<link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/">
+<link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/">
+<link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/">
+<link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于 Aura OmniMesh — 无服务器的本地优先易物协议">
+<meta property="og:description" content="Aura OmniMesh 是什么、为何而生、如何运作：一个开放协议，在附近的手机之间寻找多方易物闭环 — 无服务器、无账号、无需互联网。">
+<meta property="og:url" content="https://aura-omnimesh.pages.dev/about/zh/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#111111">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "AboutPage",
+ "name": "关于 Aura OmniMesh — 无服务器的本地优先易物协议",
+ "description": "Aura OmniMesh 是什么、为何而生、如何运作：一个开放协议，在附近的手机之间寻找多方易物闭环 — 无服务器、无账号、无需互联网。",
+ "inLanguage": "zh",
+ "url": "https://aura-omnimesh.pages.dev/about/zh/",
+ "isPartOf": {
+  "@type": "WebSite",
+  "name": "Aura OmniMesh",
+  "url": "https://aura-omnimesh.pages.dev/"
+ }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "inLanguage": "zh",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "免费吗？",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "是的 — 免费且开源，没有广告，也不出售任何东西。没有需要供养的服务器，因此没有任何可变现之处。"
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "匹配支持哪些语言？",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "设备端模型是多语言的：用一种语言写的提供可以匹配用另一种语言写的需求。目前已验证英语和俄语；该模型家族覆盖数十种语言。"
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "可以在这个协议上构建别的东西吗？",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "可以。各层 — 传输、签名 CRDT 日志、语义匹配器 — 相互独立，源代码在 GitHub 项目仓库中公开。"
+   }
+  }
+ ]
+}
+</script>
+<style>
+  :root{--obsidian:#111111;--carbon:#181818;--type:#ffffff;
+    --dim:rgba(255,255,255,.70);--slate:#777777;--hair:rgba(119,119,119,.25);
+    --emerald:#2FBF71;--s1:8px;--s2:16px;--s3:24px;--s4:32px;--s5:48px;--s6:96px;
+    --maxw:960px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--obsidian);color:var(--type);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",
+    "Noto Sans","Noto Sans KR","Noto Sans SC","Noto Sans JP","Noto Sans Devanagari",
+    Arial,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  ::selection{background:rgba(255,255,255,.2)}
+  a{color:var(--type)}
+  .rail{max-width:var(--maxw);margin:0 auto;
+    border-left:1px solid var(--slate);border-right:1px solid var(--slate)}
+  @media (max-width:1000px){.rail{border-left:0;border-right:0}}
+  .pad{padding-left:var(--s3);padding-right:var(--s3)}
+  .label{font-size:11px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--slate)}
+  nav{border-bottom:1px solid var(--slate);position:sticky;top:0;
+    background:var(--obsidian);z-index:10}
+  .nav-row{display:flex;align-items:center;justify-content:space-between;
+    padding-top:var(--s2);padding-bottom:var(--s2)}
+  .wordmark{font-size:13px;font-weight:600;letter-spacing:.18em;text-decoration:none}
+  nav .label a{color:var(--slate);text-decoration:none}
+  nav .label a:hover{color:var(--type)}
+  header.about{padding-top:var(--s5);padding-bottom:var(--s4)}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.1;font-weight:600;
+    letter-spacing:-0.02em;margin:var(--s3) 0}
+  .lede{color:var(--dim);max-width:60ch}
+  section.sec{border-top:1px solid var(--hair);
+    padding-top:var(--s4);padding-bottom:var(--s4)}
+  h2{font-size:21px;font-weight:600;letter-spacing:-0.01em;margin:var(--s2) 0 var(--s2)}
+  .sec p{color:var(--dim);max-width:66ch;margin-bottom:var(--s2)}
+  ol.steps{list-style:none;counter-reset:st;max-width:66ch}
+  ol.steps li{counter-increment:st;border-left:2px solid var(--emerald);
+    padding:2px 0 2px var(--s2);margin-bottom:var(--s3)}
+  ol.steps li::before{content:counter(st,decimal-leading-zero);
+    font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--slate);display:block}
+  ol.steps strong{display:block;margin:2px 0 4px}
+  ol.steps span{color:var(--dim)}
+  ul.plain{list-style:none;max-width:66ch}
+  ul.plain li{padding-left:var(--s2);margin-bottom:var(--s1);
+    border-left:1px solid var(--slate);color:var(--dim)}
+  ul.plain li strong{color:var(--type)}
+  details{border-top:1px solid var(--hair);max-width:66ch}
+  details:last-of-type{border-bottom:1px solid var(--hair)}
+  summary{cursor:pointer;padding:var(--s2) 0;font-weight:500;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";float:right;color:var(--slate)}
+  details[open] summary::after{content:"\2212"}
+  details p{color:var(--dim);padding-bottom:var(--s2)}
+  .langs{display:flex;flex-wrap:wrap;gap:var(--s1) var(--s2);max-width:66ch}
+  .langs a{color:var(--slate);text-decoration:none;font-size:13px}
+  .langs a:hover{color:var(--type)}
+  .langs a[aria-current]{color:var(--type);border-bottom:1px solid var(--emerald)}
+  footer{border-top:1px solid var(--slate);padding-top:var(--s4);padding-bottom:var(--s5)}
+  footer .pad{display:flex;justify-content:space-between;gap:var(--s2);
+    flex-wrap:wrap;color:var(--slate);font-size:13px}
+  footer a{color:var(--slate);text-decoration:none}
+  footer a:hover{color:var(--type)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="rail pad nav-row">
+    <a class="wordmark" href="/">AURA&nbsp;OMNIMESH</a>
+    <span class="label"><a href="/">首页</a></span>
+  </div>
+</nav>
+
+<div class="rail">
+  <header class="about pad">
+    <span class="label">关于</span>
+    <h1>没有基础设施的交换。</h1>
+    <p class="lede">Aura OmniMesh 是一个开放的本地优先（local-first）交换协议。同一空间内的手机相互发现、发布经过签名的提供与需求，并找出闭合的易物环 — 环中每个人付出一样东西、得到另一样东西。没有服务器，没有账号，不需要互联网。</p>
+  </header>
+
+  <main>
+    <section class="sec pad">
+      <span class="label">定义</span>
+      <h2>Aura OmniMesh 是什么</h2>
+      <p>Aura OmniMesh 是一个协议，也是一款免费应用，用于身处附近的人们之间的直接交换。每台设备发布简短的签名<em>意向</em> — 一项提供（“我教吉他”）或一项需求（“搬家需要帮手”）— 由手机本地运行的小型 AI 模型将它们匹配成三到七人的闭合环。</p>
+      <p>市场平台通常需要一家公司来完成的一切 — 身份、匹配、信任、历史记录 — 都由设备自身以密码学方式完成。其结果是一个在货币、银行或互联网失灵之处依然运转的交换网络。</p>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">动机</span>
+      <h2>为何而生</h2>
+      <p>直接易物通常因一个数学原因而失败：拥有你所需之物的人，很少恰好需要你所拥有的。经济学家称之为<em>需求的双重巧合</em>。闭环解决了它：甲教乙，乙借给丙，丙供给甲 — 即使没有任何一对直接匹配，环也能闭合。</p>
+      <p>第二个原因是独立性。现有的每个交易平台都运行在服务器和账号之上 — 公司可能停摆、审查信息、提高费用或收集数据。OmniMesh 把中间人作为架构事实而非承诺来移除：根本不存在需要信任、可被查封或关停的服务器。</p>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">协议</span>
+      <h2>如何运作</h2>
+      <ol class="steps">
+      <li><strong>身份是密钥，不是账号。</strong><span>首次启动时设备生成一对 Ed25519 密钥。私钥永不离开设备。无需注册、邮箱或手机号 — 你的密钥就是你的身份。</span></li>
+      <li><strong>意向是签名文本。</strong><span>你以短句发布提供与需求。手机上运行的多语言语言模型把每一条转化为语义向量，因此匹配可以跨语言进行。</span></li>
+      <li><strong>设备间同步共享日志。</strong><span>附近的手机通过蓝牙 LE、Wi-Fi Direct 或共享局域网交换签名操作日志。日志是 CRDT：与到达顺序无关、能容忍网络分区，所有设备无需协调者即可收敛到同一状态。</span></li>
+      <li><strong>一切皆验证，绝不假设。</strong><span>每个操作都要检查：签名、作者、协议规则。错误密钥下的有效签名同样被拒绝 — 只有意向的所有者能改变其状态。声誉从不从网络接受，而是由每台设备根据已签名的完成交换在本地重新计算。</span></li>
+      <li><strong>匹配器搜索闭合环。</strong><span>设备在本地的提供-需求图中搜索 3–7 人的环。搜索是确定性的：相同的数据在任何手机上都产生相同的环。</span></li>
+      <li><strong>环被锁定，人们交换，历史被签名。</strong><span>每位参与者锁定自己的一步；全部锁定后环即确认。人们见面交换并标记完成。每个阶段都是签名操作 — 中途退出会以对所有人可见的方式打破这个环。</span></li>
+      </ol>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">问题</span>
+      <h2>解决什么</h2>
+      <ul class="plain">
+      <li><strong>货币疲软或缺失时的交换</strong> — 通货膨胀、现金短缺、没有银行服务的社区。</li>
+      <li><strong>无佣金、无账号、无服务器的市场</strong> — 无需付费，无处注册。</li>
+      <li><strong>完全离线运行</strong> — 灾害、停电、偏远地区、音乐节、船上、营地。</li>
+      <li><strong>由构造保证的隐私</strong> — 除了你明确发布给附近节点的内容，任何数据都不会离开设备。</li>
+      <li><strong>多方匹配</strong> — 两人易物在数学上无法闭合的循环。</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">适用人群</span>
+      <h2>为谁而做</h2>
+      <ul class="plain">
+      <li>想要一块无运营方的本地交换板的街区、村庄与互助网络。</li>
+      <li>联合办公空间、校园、会议与音乐节 — 挤满互补技能的密集空间。</li>
+      <li>灾害或停电地区的社区 — 对基础设施的独立本身就是目的。</li>
+      <li>拒绝用自己的交易历史向公司换取撮合服务的人。</li>
+      <li>P2P 系统的研究者与开发者 — 协议与代码在 GitHub 上开放。</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">原则</span>
+      <h2>设计原则</h2>
+      <ul class="plain">
+      <li><strong>本地优先。</strong>数据保存在设备内嵌数据库中。签名日志是唯一事实来源；删除应用即删除数据。</li>
+      <li><strong>零收集。</strong>没有分析、没有遥测、没有账号。根本不存在可以接收数据的公司后端。</li>
+      <li><strong>失败即关闭（fail-closed）。</strong>无法验证的一律拒绝 — 从不猜测，从不假设。</li>
+      <li><strong>确定性。</strong>所有设备从相同数据计算出相同匹配；正确性不取决于谁在运行代码。</li>
+      <li><strong>对边界诚实。</strong>协议用平实的语言记录它不做的事 — 见下文。</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">边界</span>
+      <h2>它不是什么</h2>
+      <ul class="plain">
+      <li>不是支付系统：没有代币、没有余额、没有托管。版本 1 是商品、服务与时间的纯粹易物。</li>
+      <li>不是全球网络：范围受无线电与局域网限制。这是有意为之的街区级网络。</li>
+      <li>不防女巫攻击（Sybil）：任何人都能创建密钥。声誉只能通过完成的环赚取，从不凭空授予。</li>
+      <li>iOS 与 Android 无法直接通过无线电配对（平台 API 不同）；跨系统流量经由局域网桥接。</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">FAQ</span>
+      <h2>常见问题</h2>
+      <details>
+        <summary>免费吗？</summary>
+        <p>是的 — 免费且开源，没有广告，也不出售任何东西。没有需要供养的服务器，因此没有任何可变现之处。</p>
+      </details>
+      <details>
+        <summary>匹配支持哪些语言？</summary>
+        <p>设备端模型是多语言的：用一种语言写的提供可以匹配用另一种语言写的需求。目前已验证英语和俄语；该模型家族覆盖数十种语言。</p>
+      </details>
+      <details>
+        <summary>可以在这个协议上构建别的东西吗？</summary>
+        <p>可以。各层 — 传输、签名 CRDT 日志、语义匹配器 — 相互独立，源代码在 GitHub 项目仓库中公开。</p>
+      </details>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">语言</span>
+      <div class="langs">
+        <a href="/about/" hreflang="en" lang="en">English</a>
+        <a href="/about/es/" hreflang="es" lang="es">Español</a>
+        <a href="/about/hi/" hreflang="hi" lang="hi">हिन्दी</a>
+        <a href="/about/id/" hreflang="id" lang="id">Bahasa Indonesia</a>
+        <a href="/about/ja/" hreflang="ja" lang="ja">日本語</a>
+        <a href="/about/ko/" hreflang="ko" lang="ko">한국어</a>
+        <a href="/about/pt/" hreflang="pt" lang="pt">Português</a>
+        <a href="/about/ru/" hreflang="ru" lang="ru">Русский</a>
+        <a href="/about/uk/" hreflang="uk" lang="uk">Українська</a>
+        <a href="/about/zh/" hreflang="zh" lang="zh" aria-current="page">中文</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="pad">
+      <span>AURA OMNIMESH — 本地优先的交换协议。零服务器，源自设计。</span>
+      <span>
+        <a href="/privacy.html">Privacy</a> &nbsp;&middot;&nbsp;
+        <a href="/terms.html">Terms</a> &nbsp;&middot;&nbsp;
+        <a href="https://github.com/rf24kja/aura-omnimesh" rel="noopener">GitHub</a>
+      </span>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

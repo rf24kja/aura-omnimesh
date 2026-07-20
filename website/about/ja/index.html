@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="ja" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aura OmniMesh について — サーバーレスのローカルファースト物々交換プロトコル</title>
+<meta name="description" content="Aura OmniMesh とは何か、なぜ生まれ、どう動くのか。近くのスマートフォン同士で多者間の交換の輪を見つける開かれたプロトコル — サーバーなし、アカウントなし、インターネット不要。">
+<link rel="canonical" href="https://aura-omnimesh.pages.dev/about/ja/">
+<link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/">
+<link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/">
+<link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/">
+<link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/">
+<link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/">
+<link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/">
+<link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/">
+<link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/">
+<link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/">
+<link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/">
+<link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Aura OmniMesh について — サーバーレスのローカルファースト物々交換プロトコル">
+<meta property="og:description" content="Aura OmniMesh とは何か、なぜ生まれ、どう動くのか。近くのスマートフォン同士で多者間の交換の輪を見つける開かれたプロトコル — サーバーなし、アカウントなし、インターネット不要。">
+<meta property="og:url" content="https://aura-omnimesh.pages.dev/about/ja/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#111111">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "AboutPage",
+ "name": "Aura OmniMesh について — サーバーレスのローカルファースト物々交換プロトコル",
+ "description": "Aura OmniMesh とは何か、なぜ生まれ、どう動くのか。近くのスマートフォン同士で多者間の交換の輪を見つける開かれたプロトコル — サーバーなし、アカウントなし、インターネット不要。",
+ "inLanguage": "ja",
+ "url": "https://aura-omnimesh.pages.dev/about/ja/",
+ "isPartOf": {
+  "@type": "WebSite",
+  "name": "Aura OmniMesh",
+  "url": "https://aura-omnimesh.pages.dev/"
+ }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "inLanguage": "ja",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "無料ですか？",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "はい。無料でオープンソース、広告なし、売り物なし。維持すべきサーバーがないので、収益化するものが何もありません。"
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "マッチングはどの言語を理解しますか？",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "端末上のモデルは多言語対応です。ある言語で書かれた提供が、別の言語で書かれた必要とマッチしえます。現在は英語とロシア語で検証済みで、モデルファミリーは数十言語をカバーします。"
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "このプロトコルの上に別のものを作れますか？",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "はい。トランスポート、署名付き CRDT ログ、意味マッチャーという各層は分離可能で、ソースコードは GitHub のプロジェクトリポジトリで公開されています。"
+   }
+  }
+ ]
+}
+</script>
+<style>
+  :root{--obsidian:#111111;--carbon:#181818;--type:#ffffff;
+    --dim:rgba(255,255,255,.70);--slate:#777777;--hair:rgba(119,119,119,.25);
+    --emerald:#2FBF71;--s1:8px;--s2:16px;--s3:24px;--s4:32px;--s5:48px;--s6:96px;
+    --maxw:960px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--obsidian);color:var(--type);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",
+    "Noto Sans","Noto Sans KR","Noto Sans SC","Noto Sans JP","Noto Sans Devanagari",
+    Arial,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  ::selection{background:rgba(255,255,255,.2)}
+  a{color:var(--type)}
+  .rail{max-width:var(--maxw);margin:0 auto;
+    border-left:1px solid var(--slate);border-right:1px solid var(--slate)}
+  @media (max-width:1000px){.rail{border-left:0;border-right:0}}
+  .pad{padding-left:var(--s3);padding-right:var(--s3)}
+  .label{font-size:11px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--slate)}
+  nav{border-bottom:1px solid var(--slate);position:sticky;top:0;
+    background:var(--obsidian);z-index:10}
+  .nav-row{display:flex;align-items:center;justify-content:space-between;
+    padding-top:var(--s2);padding-bottom:var(--s2)}
+  .wordmark{font-size:13px;font-weight:600;letter-spacing:.18em;text-decoration:none}
+  nav .label a{color:var(--slate);text-decoration:none}
+  nav .label a:hover{color:var(--type)}
+  header.about{padding-top:var(--s5);padding-bottom:var(--s4)}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.1;font-weight:600;
+    letter-spacing:-0.02em;margin:var(--s3) 0}
+  .lede{color:var(--dim);max-width:60ch}
+  section.sec{border-top:1px solid var(--hair);
+    padding-top:var(--s4);padding-bottom:var(--s4)}
+  h2{font-size:21px;font-weight:600;letter-spacing:-0.01em;margin:var(--s2) 0 var(--s2)}
+  .sec p{color:var(--dim);max-width:66ch;margin-bottom:var(--s2)}
+  ol.steps{list-style:none;counter-reset:st;max-width:66ch}
+  ol.steps li{counter-increment:st;border-left:2px solid var(--emerald);
+    padding:2px 0 2px var(--s2);margin-bottom:var(--s3)}
+  ol.steps li::before{content:counter(st,decimal-leading-zero);
+    font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--slate);display:block}
+  ol.steps strong{display:block;margin:2px 0 4px}
+  ol.steps span{color:var(--dim)}
+  ul.plain{list-style:none;max-width:66ch}
+  ul.plain li{padding-left:var(--s2);margin-bottom:var(--s1);
+    border-left:1px solid var(--slate);color:var(--dim)}
+  ul.plain li strong{color:var(--type)}
+  details{border-top:1px solid var(--hair);max-width:66ch}
+  details:last-of-type{border-bottom:1px solid var(--hair)}
+  summary{cursor:pointer;padding:var(--s2) 0;font-weight:500;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";float:right;color:var(--slate)}
+  details[open] summary::after{content:"\2212"}
+  details p{color:var(--dim);padding-bottom:var(--s2)}
+  .langs{display:flex;flex-wrap:wrap;gap:var(--s1) var(--s2);max-width:66ch}
+  .langs a{color:var(--slate);text-decoration:none;font-size:13px}
+  .langs a:hover{color:var(--type)}
+  .langs a[aria-current]{color:var(--type);border-bottom:1px solid var(--emerald)}
+  footer{border-top:1px solid var(--slate);padding-top:var(--s4);padding-bottom:var(--s5)}
+  footer .pad{display:flex;justify-content:space-between;gap:var(--s2);
+    flex-wrap:wrap;color:var(--slate);font-size:13px}
+  footer a{color:var(--slate);text-decoration:none}
+  footer a:hover{color:var(--type)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="rail pad nav-row">
+    <a class="wordmark" href="/">AURA&nbsp;OMNIMESH</a>
+    <span class="label"><a href="/">ホーム</a></span>
+  </div>
+</nav>
+
+<div class="rail">
+  <header class="about pad">
+    <span class="label">概要</span>
+    <h1>インフラのいらない交換。</h1>
+    <p class="lede">Aura OmniMesh はオープンなローカルファースト交換プロトコルです。同じ空間にあるスマートフォンが互いを発見し、署名された「提供」と「必要」を公開し、閉じた交換の輪 — 全員が何かひとつを与え、何かひとつを受け取る循環 — を見つけ出します。サーバーも、アカウントも、インターネットも不要です。</p>
+  </header>
+
+  <main>
+    <section class="sec pad">
+      <span class="label">定義</span>
+      <h2>Aura OmniMesh とは</h2>
+      <p>Aura OmniMesh は、物理的に近くにいる人々の直接交換のためのプロトコルであり、無料アプリです。各端末は署名付きの短い<em>インテント</em> — 提供（「ギターを教えます」）や必要（「引っ越しを手伝ってほしい」）— を公開し、スマートフォン上で動く小さな AI モデルがそれらを 3〜7 人の閉じた輪へと結びます。</p>
+      <p>マーケットプレイスが普通なら企業に頼ること — 本人確認、マッチング、信頼、履歴 — を、端末自身が暗号技術で行います。その結果、お金や銀行やインターネットが機能しない場所でも動き続ける交換ネットワークが生まれます。</p>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">動機</span>
+      <h2>なぜ生まれたのか</h2>
+      <p>直接の物々交換はたいてい数学的な理由で失敗します。あなたの必要なものを持つ人が、あなたの持つものを必要としていることは稀だからです。経済学では<em>欲求の二重の一致</em>と呼ばれる問題です。輪はこれを解きます。A が B に教え、B が C に貸し、C が A に供給する — どの組も直接には一致しなくても、循環は閉じます。</p>
+      <p>もうひとつの理由は独立性です。既存のマーケットプレイスはすべてサーバーとアカウントの上で動いています。企業は停止することも、出品を検閲することも、手数料を上げることも、データを収集することもできます。OmniMesh は仲介者を約束としてではなく、アーキテクチャの事実として取り除きます。信頼すべき、差し押さえられうる、停止されうるサーバーが、そもそも存在しないのです。</p>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">プロトコル</span>
+      <h2>仕組み</h2>
+      <ol class="steps">
+      <li><strong>アイデンティティは鍵であり、アカウントではない。</strong><span>初回起動時に端末が Ed25519 の鍵ペアを生成します。秘密鍵は端末の外へ一切出ません。登録も、メールも、電話番号も不要 — あなたの鍵があなたのアイデンティティです。</span></li>
+      <li><strong>インテントは署名されたテキスト。</strong><span>提供と必要を短い文で公開します。スマートフォン上で動く多言語モデルがそれぞれを意味ベクトルへ変換するため、異なる言語の間でもマッチングが機能します。</span></li>
+      <li><strong>端末同士が共有ログを交換する。</strong><span>近くのスマートフォンは Bluetooth LE、Wi-Fi Direct、または共有ローカルネットワーク経由で署名付き操作ログを交換します。ログは CRDT です。順序に依存せず、ネットワーク分断にも耐えるため、調整役なしで全端末が同じ状態に収束します。</span></li>
+      <li><strong>すべてを検証し、何も仮定しない。</strong><span>すべての操作は署名・作成者・プロトコル規則が検査されます。誤った鍵の下では有効な署名でも拒否されます — インテントの状態を変えられるのは所有者だけです。評判は決してネットワークから受け取らず、各端末が署名済みの完了履歴からローカルに再計算します。</span></li>
+      <li><strong>マッチャーが閉じた循環を探す。</strong><span>端末は提供と必要のローカルグラフから 3〜7 人の輪を探索します。探索は決定的です。同じデータはどの端末でも同じ輪を生みます。</span></li>
+      <li><strong>輪がロックされ、人々が交換し、履歴が署名される。</strong><span>各参加者が自分のステップをロックし、全員がロックすると輪は確定します。人々は会い、交換し、履行を記録します。どの段階も署名された操作です — 途中離脱は全員に見える形で輪を壊します。</span></li>
+      </ol>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">課題</span>
+      <h2>何を解決するか</h2>
+      <ul class="plain">
+      <li><strong>お金が弱い・使えないときの交換</strong> — インフレ、現金不足、銀行のないコミュニティ。</li>
+      <li><strong>手数料・アカウント・サーバーのない市場</strong> — 支払うものも、登録先もありません。</li>
+      <li><strong>完全オフラインでの動作</strong> — 災害、停電、遠隔地、フェスティバル、船上、キャンプ。</li>
+      <li><strong>構造としてのプライバシー</strong> — 近くのピアへ明示的に公開したもの以外、何も端末から出ません。</li>
+      <li><strong>多者間マッチング</strong> — 二者間の物々交換では数学的に閉じられない循環。</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">対象</span>
+      <h2>誰のためのものか</h2>
+      <ul class="plain">
+      <li>運営者のいない地域交換掲示板を求める町内会・集落・相互扶助ネットワーク。</li>
+      <li>コワーキング、キャンパス、カンファレンス、フェス — 補い合うスキルが密集する空間。</li>
+      <li>災害地域や停電地域のコミュニティ — インフラからの独立こそが目的になる場所。</li>
+      <li>マッチングサービスと引き換えに取引履歴を企業へ渡すことを拒む人々。</li>
+      <li>P2P システムの研究者・開発者 — プロトコルとコードは GitHub で公開されています。</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">原則</span>
+      <h2>設計原則</h2>
+      <ul class="plain">
+      <li><strong>ローカルファースト。</strong>データは端末内の組み込みデータベースに保存されます。署名済みログが唯一の真実であり、アプリを消せばデータも消えます。</li>
+      <li><strong>収集ゼロ。</strong>アナリティクスも、テレメトリーも、アカウントもありません。何かを送る先となる企業のバックエンドが存在しません。</li>
+      <li><strong>フェイルクローズド。</strong>検証できないものは拒否します — 推測も仮定も決してしません。</li>
+      <li><strong>決定性。</strong>同じデータからは全端末が同一のマッチングを計算します。正しさは誰がコードを動かすかに依存しません。</li>
+      <li><strong>限界への誠実さ。</strong>このプロトコルがしないことを、以下に平易な言葉で記しています。</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">境界</span>
+      <h2>これは何ではないか</h2>
+      <ul class="plain">
+      <li>決済システムではありません。トークンも残高もカストディもなし。バージョン 1 は財・サービス・時間の純粋な物々交換です。</li>
+      <li>グローバルではありません。範囲は無線とローカルネットワークに限られます。設計上、ご近所スケールのネットワークです。</li>
+      <li>Sybil 耐性はありません。鍵は誰でも作れます。評判は完了した輪からのみ獲得され、決して付与されません。</li>
+      <li>iOS と Android は電波で直接ペアリングできません（プラットフォーム API が異なるため）。OS 間の通信はローカルネットワークのブリッジを経由します。</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">FAQ</span>
+      <h2>よくある質問</h2>
+      <details>
+        <summary>無料ですか？</summary>
+        <p>はい。無料でオープンソース、広告なし、売り物なし。維持すべきサーバーがないので、収益化するものが何もありません。</p>
+      </details>
+      <details>
+        <summary>マッチングはどの言語を理解しますか？</summary>
+        <p>端末上のモデルは多言語対応です。ある言語で書かれた提供が、別の言語で書かれた必要とマッチしえます。現在は英語とロシア語で検証済みで、モデルファミリーは数十言語をカバーします。</p>
+      </details>
+      <details>
+        <summary>このプロトコルの上に別のものを作れますか？</summary>
+        <p>はい。トランスポート、署名付き CRDT ログ、意味マッチャーという各層は分離可能で、ソースコードは GitHub のプロジェクトリポジトリで公開されています。</p>
+      </details>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">言語</span>
+      <div class="langs">
+        <a href="/about/" hreflang="en" lang="en">English</a>
+        <a href="/about/es/" hreflang="es" lang="es">Español</a>
+        <a href="/about/hi/" hreflang="hi" lang="hi">हिन्दी</a>
+        <a href="/about/id/" hreflang="id" lang="id">Bahasa Indonesia</a>
+        <a href="/about/ja/" hreflang="ja" lang="ja" aria-current="page">日本語</a>
+        <a href="/about/ko/" hreflang="ko" lang="ko">한국어</a>
+        <a href="/about/pt/" hreflang="pt" lang="pt">Português</a>
+        <a href="/about/ru/" hreflang="ru" lang="ru">Русский</a>
+        <a href="/about/uk/" hreflang="uk" lang="uk">Українська</a>
+        <a href="/about/zh/" hreflang="zh" lang="zh">中文</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="pad">
+      <span>AURA OMNIMESH — ローカルファーストの交換プロトコル。設計からしてサーバーゼロ。</span>
+      <span>
+        <a href="/privacy.html">Privacy</a> &nbsp;&middot;&nbsp;
+        <a href="/terms.html">Terms</a> &nbsp;&middot;&nbsp;
+        <a href="https://github.com/rf24kja/aura-omnimesh" rel="noopener">GitHub</a>
+      </span>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="hi" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aura OmniMesh के बारे में — बिना सर्वर वाला, लोकल-फ़र्स्ट वस्तु-विनिमय प्रोटोकॉल</title>
+<meta name="description" content="Aura OmniMesh क्या है, क्यों बनाया गया और कैसे काम करता है: एक खुला प्रोटोकॉल जो पास-पास के फ़ोनों के बीच बहुपक्षीय विनिमय चक्र खोजता है — न सर्वर, न खाते, न इंटरनेट की ज़रूरत।">
+<link rel="canonical" href="https://aura-omnimesh.pages.dev/about/hi/">
+<link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/">
+<link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/">
+<link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/">
+<link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/">
+<link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/">
+<link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/">
+<link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/">
+<link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/">
+<link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/">
+<link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/">
+<link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Aura OmniMesh के बारे में — बिना सर्वर वाला, लोकल-फ़र्स्ट वस्तु-विनिमय प्रोटोकॉल">
+<meta property="og:description" content="Aura OmniMesh क्या है, क्यों बनाया गया और कैसे काम करता है: एक खुला प्रोटोकॉल जो पास-पास के फ़ोनों के बीच बहुपक्षीय विनिमय चक्र खोजता है — न सर्वर, न खाते, न इंटरनेट की ज़रूरत।">
+<meta property="og:url" content="https://aura-omnimesh.pages.dev/about/hi/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#111111">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "AboutPage",
+ "name": "Aura OmniMesh के बारे में — बिना सर्वर वाला, लोकल-फ़र्स्ट वस्तु-विनिमय प्रोटोकॉल",
+ "description": "Aura OmniMesh क्या है, क्यों बनाया गया और कैसे काम करता है: एक खुला प्रोटोकॉल जो पास-पास के फ़ोनों के बीच बहुपक्षीय विनिमय चक्र खोजता है — न सर्वर, न खाते, न इंटरनेट की ज़रूरत।",
+ "inLanguage": "hi",
+ "url": "https://aura-omnimesh.pages.dev/about/hi/",
+ "isPartOf": {
+  "@type": "WebSite",
+  "name": "Aura OmniMesh",
+  "url": "https://aura-omnimesh.pages.dev/"
+ }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "inLanguage": "hi",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "क्या यह मुफ़्त है?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "हाँ — मुफ़्त और ओपन सोर्स, न विज्ञापन, न कुछ बेचने को। चलाने के लिए कोई सर्वर नहीं, इसलिए कमाई करने लायक़ कुछ है ही नहीं।"
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "मिलान कौन-सी भाषाएँ समझता है?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "डिवाइस पर चलने वाला मॉडल बहुभाषी है: एक भाषा में लिखी पेशकश दूसरी भाषा में लिखी ज़रूरत से मेल खा सकती है। अभी अंग्रेज़ी और रूसी सत्यापित हैं; मॉडल-परिवार दर्जनों भाषाएँ कवर करता है।"
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "क्या मैं इस प्रोटोकॉल पर कुछ और बना सकता हूँ?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "हाँ। परतें — ट्रांसपोर्ट, हस्ताक्षरित CRDT लॉग, अर्थ-मिलानकर्ता — अलग की जा सकती हैं, और स्रोत कोड GitHub पर परियोजना की रिपॉज़िटरी में सार्वजनिक है।"
+   }
+  }
+ ]
+}
+</script>
+<style>
+  :root{--obsidian:#111111;--carbon:#181818;--type:#ffffff;
+    --dim:rgba(255,255,255,.70);--slate:#777777;--hair:rgba(119,119,119,.25);
+    --emerald:#2FBF71;--s1:8px;--s2:16px;--s3:24px;--s4:32px;--s5:48px;--s6:96px;
+    --maxw:960px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--obsidian);color:var(--type);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",
+    "Noto Sans","Noto Sans KR","Noto Sans SC","Noto Sans JP","Noto Sans Devanagari",
+    Arial,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  ::selection{background:rgba(255,255,255,.2)}
+  a{color:var(--type)}
+  .rail{max-width:var(--maxw);margin:0 auto;
+    border-left:1px solid var(--slate);border-right:1px solid var(--slate)}
+  @media (max-width:1000px){.rail{border-left:0;border-right:0}}
+  .pad{padding-left:var(--s3);padding-right:var(--s3)}
+  .label{font-size:11px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--slate)}
+  nav{border-bottom:1px solid var(--slate);position:sticky;top:0;
+    background:var(--obsidian);z-index:10}
+  .nav-row{display:flex;align-items:center;justify-content:space-between;
+    padding-top:var(--s2);padding-bottom:var(--s2)}
+  .wordmark{font-size:13px;font-weight:600;letter-spacing:.18em;text-decoration:none}
+  nav .label a{color:var(--slate);text-decoration:none}
+  nav .label a:hover{color:var(--type)}
+  header.about{padding-top:var(--s5);padding-bottom:var(--s4)}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.1;font-weight:600;
+    letter-spacing:-0.02em;margin:var(--s3) 0}
+  .lede{color:var(--dim);max-width:60ch}
+  section.sec{border-top:1px solid var(--hair);
+    padding-top:var(--s4);padding-bottom:var(--s4)}
+  h2{font-size:21px;font-weight:600;letter-spacing:-0.01em;margin:var(--s2) 0 var(--s2)}
+  .sec p{color:var(--dim);max-width:66ch;margin-bottom:var(--s2)}
+  ol.steps{list-style:none;counter-reset:st;max-width:66ch}
+  ol.steps li{counter-increment:st;border-left:2px solid var(--emerald);
+    padding:2px 0 2px var(--s2);margin-bottom:var(--s3)}
+  ol.steps li::before{content:counter(st,decimal-leading-zero);
+    font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--slate);display:block}
+  ol.steps strong{display:block;margin:2px 0 4px}
+  ol.steps span{color:var(--dim)}
+  ul.plain{list-style:none;max-width:66ch}
+  ul.plain li{padding-left:var(--s2);margin-bottom:var(--s1);
+    border-left:1px solid var(--slate);color:var(--dim)}
+  ul.plain li strong{color:var(--type)}
+  details{border-top:1px solid var(--hair);max-width:66ch}
+  details:last-of-type{border-bottom:1px solid var(--hair)}
+  summary{cursor:pointer;padding:var(--s2) 0;font-weight:500;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";float:right;color:var(--slate)}
+  details[open] summary::after{content:"\2212"}
+  details p{color:var(--dim);padding-bottom:var(--s2)}
+  .langs{display:flex;flex-wrap:wrap;gap:var(--s1) var(--s2);max-width:66ch}
+  .langs a{color:var(--slate);text-decoration:none;font-size:13px}
+  .langs a:hover{color:var(--type)}
+  .langs a[aria-current]{color:var(--type);border-bottom:1px solid var(--emerald)}
+  footer{border-top:1px solid var(--slate);padding-top:var(--s4);padding-bottom:var(--s5)}
+  footer .pad{display:flex;justify-content:space-between;gap:var(--s2);
+    flex-wrap:wrap;color:var(--slate);font-size:13px}
+  footer a{color:var(--slate);text-decoration:none}
+  footer a:hover{color:var(--type)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="rail pad nav-row">
+    <a class="wordmark" href="/">AURA&nbsp;OMNIMESH</a>
+    <span class="label"><a href="/">मुख्य पृष्ठ</a></span>
+  </div>
+</nav>
+
+<div class="rail">
+  <header class="about pad">
+    <span class="label">परिचय</span>
+    <h1>बिना बुनियादी ढाँचे के लेन-देन।</h1>
+    <p class="lede">Aura OmniMesh एक खुला, लोकल-फ़र्स्ट विनिमय प्रोटोकॉल है। एक ही कमरे के फ़ोन एक-दूसरे को खोजते हैं, हस्ताक्षरित पेशकशें और ज़रूरतें साझा करते हैं, और बंद विनिमय चक्र बनाते हैं — ऐसे चक्र जिनमें हर व्यक्ति एक चीज़ देता है और एक चीज़ पाता है। न सर्वर, न खाते, न इंटरनेट।</p>
+  </header>
+
+  <main>
+    <section class="sec pad">
+      <span class="label">परिभाषा</span>
+      <h2>Aura OmniMesh क्या है</h2>
+      <p>Aura OmniMesh एक प्रोटोकॉल और मुफ़्त ऐप है, जो शारीरिक रूप से पास-पास मौजूद लोगों के बीच सीधे लेन-देन के लिए बना है। हर डिवाइस छोटे हस्ताक्षरित <em>इरादे (intents)</em> प्रकाशित करता है — कोई पेशकश (“मैं गिटार सिखाता हूँ”) या कोई ज़रूरत (“घर शिफ़्ट करने में मदद चाहिए”) — और फ़ोन पर ही चलने वाला एक छोटा AI मॉडल उन्हें तीन से सात प्रतिभागियों के बंद चक्रों में जोड़ देता है।</p>
+      <p>जिन कामों के लिए किसी मार्केटप्लेस को आम तौर पर कंपनी चाहिए होती है — पहचान, मिलान, भरोसा, इतिहास — वे सब डिवाइस ख़ुद, क्रिप्टोग्राफ़ी से करते हैं। नतीजा: एक ऐसा विनिमय नेटवर्क जो वहाँ भी चलता रहता है जहाँ पैसा, बैंक या इंटरनेट काम नहीं करते।</p>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">प्रेरणा</span>
+      <h2>यह क्यों बनाया गया</h2>
+      <p>सीधा वस्तु-विनिमय अक्सर एक गणितीय कारण से विफल होता है: जिसके पास आपकी ज़रूरत की चीज़ है, उसे शायद ही कभी आपकी चीज़ की ज़रूरत होती है। अर्थशास्त्री इसे <em>इच्छाओं का दोहरा संयोग</em> कहते हैं। चक्र इसे हल करते हैं: A, B को सिखाता है; B, C को उधार देता है; C, A को सामान देता है — कोई भी जोड़ी सीधे मेल न खाए, फिर भी चक्र पूरा हो जाता है।</p>
+      <p>दूसरा कारण है स्वतंत्रता। हर मौजूदा मार्केटप्लेस सर्वरों और खातों पर चलता है — एक कंपनी जो बंद हो सकती है, विज्ञापन हटा सकती है, शुल्क बढ़ा सकती है या डेटा जमा कर सकती है। OmniMesh बिचौलिए को वादे के तौर पर नहीं, वास्तुकला के तथ्य के तौर पर हटाता है: भरोसा करने, ज़ब्त करने या बंद करने लायक़ कोई सर्वर है ही नहीं।</p>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">प्रोटोकॉल</span>
+      <h2>यह कैसे काम करता है</h2>
+      <ol class="steps">
+      <li><strong>पहचान एक कुंजी है, खाता नहीं।</strong><span>पहली बार चलने पर डिवाइस Ed25519 कुंजी-युग्म बनाता है। निजी कुंजी कभी डिवाइस से बाहर नहीं जाती। न पंजीकरण, न ईमेल, न फ़ोन नंबर — आपकी कुंजी ही आपकी पहचान है।</span></li>
+      <li><strong>इरादे हस्ताक्षरित पाठ हैं।</strong><span>आप पेशकशें और ज़रूरतें छोटे वाक्यों में प्रकाशित करते हैं। फ़ोन पर चलने वाला बहुभाषी भाषा मॉडल हर वाक्य को अर्थ-सदिश (semantic vector) में बदलता है, इसलिए मिलान अलग-अलग भाषाओं के बीच भी काम करता है।</span></li>
+      <li><strong>डिवाइस साझा लॉग का आदान-प्रदान करते हैं।</strong><span>पास के फ़ोन Bluetooth LE, Wi-Fi Direct या साझा लोकल नेटवर्क पर हस्ताक्षरित ऑपरेशन-लॉग बदलते हैं। लॉग एक CRDT है: क्रम से स्वतंत्र और नेटवर्क विभाजन सहने वाला, इसलिए बिना किसी समन्वयक के सभी डिवाइस एक ही अवस्था पर पहुँचते हैं।</span></li>
+      <li><strong>सब कुछ सत्यापित होता है, कुछ भी मान नहीं लिया जाता।</strong><span>हर ऑपरेशन की जाँच होती है: हस्ताक्षर, लेखक, प्रोटोकॉल नियम। ग़लत कुंजी के नीचे वैध हस्ताक्षर भी अस्वीकार होता है — किसी इरादे की स्थिति केवल उसका मालिक बदल सकता है। प्रतिष्ठा कभी नेटवर्क से स्वीकार नहीं की जाती; हर डिवाइस उसे हस्ताक्षरित पूर्ण लेन-देन के इतिहास से स्थानीय रूप से दोबारा गिनता है।</span></li>
+      <li><strong>मैचर बंद चक्र खोजता है।</strong><span>डिवाइस पेशकशों और ज़रूरतों के स्थानीय ग्राफ़ में 3–7 प्रतिभागियों के चक्र खोजता है। खोज नियतात्मक (deterministic) है: एक जैसे डेटा से हर फ़ोन पर एक जैसे चक्र बनते हैं।</span></li>
+      <li><strong>चक्र लॉक होता है, लोग विनिमय करते हैं, इतिहास हस्ताक्षरित रहता है।</strong><span>हर प्रतिभागी अपना चरण लॉक करता है; सब लॉक हो जाएँ तो चक्र पुष्ट हो जाता है। लोग मिलते हैं, विनिमय करते हैं और पूर्ति दर्ज करते हैं। हर चरण एक हस्ताक्षरित ऑपरेशन है — बीच में हटना चक्र को सबके सामने दिखते हुए तोड़ देता है।</span></li>
+      </ol>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">समस्याएँ</span>
+      <h2>यह क्या हल करता है</h2>
+      <ul class="plain">
+      <li><strong>जब पैसा कमज़ोर या अनुपलब्ध हो, तब लेन-देन</strong> — महँगाई, नक़दी की कमी, बैंक-रहित समुदाय।</li>
+      <li><strong>बिना शुल्क, खातों या सर्वरों वाला मार्केटप्लेस</strong> — न कुछ चुकाना है, न कहीं पंजीकरण कराना है।</li>
+      <li><strong>पूरी तरह ऑफ़लाइन काम</strong> — आपदाएँ, बिजली कटौती, दूरदराज़ के इलाक़े, मेले-उत्सव, जहाज़, शिविर।</li>
+      <li><strong>बनावट से ही निजता</strong> — जो आप पड़ोसियों को स्पष्ट रूप से प्रकाशित करते हैं, उसके सिवा कुछ भी डिवाइस से बाहर नहीं जाता।</li>
+      <li><strong>बहुपक्षीय मिलान</strong> — वे चक्र जिन्हें दो लोगों का विनिमय गणितीय रूप से पूरा नहीं कर सकता।</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">किनके लिए</span>
+      <h2>यह किनके लिए है</h2>
+      <ul class="plain">
+      <li>मोहल्ले, गाँव और परस्पर-सहायता नेटवर्क, जिन्हें बिना संचालक वाला स्थानीय विनिमय-पट चाहिए।</li>
+      <li>कोवर्किंग, कैंपस, सम्मेलन और उत्सव — पूरक हुनरों से भरे घने स्थान।</li>
+      <li>आपदा या बिजली-कटौती वाले क्षेत्रों के समुदाय, जहाँ बुनियादी ढाँचे से स्वतंत्रता ही लक्ष्य है।</li>
+      <li>वे लोग जो मिलान-सेवा के बदले अपनी लेन-देन की हिस्ट्री किसी कंपनी को देने से इनकार करते हैं।</li>
+      <li>P2P प्रणालियों के शोधकर्ता और डेवलपर — प्रोटोकॉल और कोड GitHub पर खुले हैं।</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">सिद्धांत</span>
+      <h2>डिज़ाइन सिद्धांत</h2>
+      <ul class="plain">
+      <li><strong>लोकल-फ़र्स्ट।</strong> आपका डेटा आपके डिवाइस के भीतर एम्बेडेड डेटाबेस में रहता है। हस्ताक्षरित लॉग ही सत्य का स्रोत है; ऐप हटाते ही डेटा भी हट जाता है।</li>
+      <li><strong>शून्य संग्रह।</strong> न एनालिटिक्स, न टेलीमेट्री, न खाते। कंपनी का कोई बैकएंड है ही नहीं जहाँ कुछ भेजा जा सके।</li>
+      <li><strong>Fail-closed।</strong> जो सत्यापित नहीं हो सकता, वह अस्वीकार होता है — कभी अनुमान नहीं, कभी धारणा नहीं।</li>
+      <li><strong>नियतात्मकता।</strong> एक जैसे डेटा से सभी डिवाइस एक जैसे मिलान निकालते हैं; शुद्धता इस पर निर्भर नहीं कि कोड कौन चला रहा है।</li>
+      <li><strong>सीमाओं के प्रति ईमानदारी।</strong> प्रोटोकॉल जो नहीं करता, वह नीचे साफ़ शब्दों में दर्ज है।</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">सीमाएँ</span>
+      <h2>यह क्या नहीं है</h2>
+      <ul class="plain">
+      <li>भुगतान प्रणाली नहीं: न टोकन, न बैलेंस, न अभिरक्षा। संस्करण 1 वस्तुओं, सेवाओं और समय का शुद्ध विनिमय है।</li>
+      <li>वैश्विक नहीं: दायरा रेडियो और लोकल नेटवर्क तक सीमित है। यह जान-बूझकर मोहल्ला-स्तर का नेटवर्क है।</li>
+      <li>Sybil-रोधी नहीं: कुंजी कोई भी बना सकता है। प्रतिष्ठा पूर्ण चक्रों से कमाई जाती है, कभी दी नहीं जाती।</li>
+      <li>iOS और Android सीधे रेडियो से नहीं जुड़ते (प्लेटफ़ॉर्म API अलग हैं); दोनों प्रणालियों के बीच ट्रैफ़िक लोकल नेटवर्क ब्रिज से जाता है।</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">FAQ</span>
+      <h2>अक्सर पूछे जाने वाले प्रश्न</h2>
+      <details>
+        <summary>क्या यह मुफ़्त है?</summary>
+        <p>हाँ — मुफ़्त और ओपन सोर्स, न विज्ञापन, न कुछ बेचने को। चलाने के लिए कोई सर्वर नहीं, इसलिए कमाई करने लायक़ कुछ है ही नहीं।</p>
+      </details>
+      <details>
+        <summary>मिलान कौन-सी भाषाएँ समझता है?</summary>
+        <p>डिवाइस पर चलने वाला मॉडल बहुभाषी है: एक भाषा में लिखी पेशकश दूसरी भाषा में लिखी ज़रूरत से मेल खा सकती है। अभी अंग्रेज़ी और रूसी सत्यापित हैं; मॉडल-परिवार दर्जनों भाषाएँ कवर करता है।</p>
+      </details>
+      <details>
+        <summary>क्या मैं इस प्रोटोकॉल पर कुछ और बना सकता हूँ?</summary>
+        <p>हाँ। परतें — ट्रांसपोर्ट, हस्ताक्षरित CRDT लॉग, अर्थ-मिलानकर्ता — अलग की जा सकती हैं, और स्रोत कोड GitHub पर परियोजना की रिपॉज़िटरी में सार्वजनिक है।</p>
+      </details>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">भाषाएँ</span>
+      <div class="langs">
+        <a href="/about/" hreflang="en" lang="en">English</a>
+        <a href="/about/es/" hreflang="es" lang="es">Español</a>
+        <a href="/about/hi/" hreflang="hi" lang="hi" aria-current="page">हिन्दी</a>
+        <a href="/about/id/" hreflang="id" lang="id">Bahasa Indonesia</a>
+        <a href="/about/ja/" hreflang="ja" lang="ja">日本語</a>
+        <a href="/about/ko/" hreflang="ko" lang="ko">한국어</a>
+        <a href="/about/pt/" hreflang="pt" lang="pt">Português</a>
+        <a href="/about/ru/" hreflang="ru" lang="ru">Русский</a>
+        <a href="/about/uk/" hreflang="uk" lang="uk">Українська</a>
+        <a href="/about/zh/" hreflang="zh" lang="zh">中文</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="pad">
+      <span>AURA OMNIMESH — एक लोकल-फ़र्स्ट विनिमय प्रोटोकॉल। डिज़ाइन से ही शून्य सर्वर।</span>
+      <span>
+        <a href="/privacy.html">Privacy</a> &nbsp;&middot;&nbsp;
+        <a href="/terms.html">Terms</a> &nbsp;&middot;&nbsp;
+        <a href="https://github.com/rf24kja/aura-omnimesh" rel="noopener">GitHub</a>
+      </span>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

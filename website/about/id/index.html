@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="id" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tentang Aura OmniMesh — protokol barter lokal tanpa server</title>
+<meta name="description" content="Apa itu Aura OmniMesh, mengapa dibuat, dan cara kerjanya: protokol terbuka yang menemukan lingkaran barter multilateral antara ponsel-ponsel di sekitar — tanpa server, tanpa akun, tanpa internet.">
+<link rel="canonical" href="https://aura-omnimesh.pages.dev/about/id/">
+<link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/">
+<link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/">
+<link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/">
+<link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/">
+<link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/">
+<link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/">
+<link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/">
+<link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/">
+<link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/">
+<link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/">
+<link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tentang Aura OmniMesh — protokol barter lokal tanpa server">
+<meta property="og:description" content="Apa itu Aura OmniMesh, mengapa dibuat, dan cara kerjanya: protokol terbuka yang menemukan lingkaran barter multilateral antara ponsel-ponsel di sekitar — tanpa server, tanpa akun, tanpa internet.">
+<meta property="og:url" content="https://aura-omnimesh.pages.dev/about/id/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#111111">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "AboutPage",
+ "name": "Tentang Aura OmniMesh — protokol barter lokal tanpa server",
+ "description": "Apa itu Aura OmniMesh, mengapa dibuat, dan cara kerjanya: protokol terbuka yang menemukan lingkaran barter multilateral antara ponsel-ponsel di sekitar — tanpa server, tanpa akun, tanpa internet.",
+ "inLanguage": "id",
+ "url": "https://aura-omnimesh.pages.dev/about/id/",
+ "isPartOf": {
+  "@type": "WebSite",
+  "name": "Aura OmniMesh",
+  "url": "https://aura-omnimesh.pages.dev/"
+ }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "inLanguage": "id",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "Apakah gratis?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Ya — gratis dan open source, tanpa iklan dan tak ada yang dijual. Tidak ada server yang harus dibiayai, jadi tidak ada yang perlu dimonetisasi."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Bahasa apa saja yang dipahami pencocokan?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Model di perangkat bersifat multibahasa: penawaran yang ditulis dalam satu bahasa bisa cocok dengan kebutuhan dalam bahasa lain. Saat ini bahasa Inggris dan Rusia sudah tervalidasi; keluarga modelnya mencakup puluhan bahasa."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Bisakah saya membangun hal lain di atas protokol ini?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Bisa. Lapisan-lapisannya — transport, log CRDT bertanda tangan, pencocok semantik — dapat dipisah, dan kode sumbernya publik di GitHub, di repositori proyek."
+   }
+  }
+ ]
+}
+</script>
+<style>
+  :root{--obsidian:#111111;--carbon:#181818;--type:#ffffff;
+    --dim:rgba(255,255,255,.70);--slate:#777777;--hair:rgba(119,119,119,.25);
+    --emerald:#2FBF71;--s1:8px;--s2:16px;--s3:24px;--s4:32px;--s5:48px;--s6:96px;
+    --maxw:960px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--obsidian);color:var(--type);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",
+    "Noto Sans","Noto Sans KR","Noto Sans SC","Noto Sans JP","Noto Sans Devanagari",
+    Arial,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  ::selection{background:rgba(255,255,255,.2)}
+  a{color:var(--type)}
+  .rail{max-width:var(--maxw);margin:0 auto;
+    border-left:1px solid var(--slate);border-right:1px solid var(--slate)}
+  @media (max-width:1000px){.rail{border-left:0;border-right:0}}
+  .pad{padding-left:var(--s3);padding-right:var(--s3)}
+  .label{font-size:11px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--slate)}
+  nav{border-bottom:1px solid var(--slate);position:sticky;top:0;
+    background:var(--obsidian);z-index:10}
+  .nav-row{display:flex;align-items:center;justify-content:space-between;
+    padding-top:var(--s2);padding-bottom:var(--s2)}
+  .wordmark{font-size:13px;font-weight:600;letter-spacing:.18em;text-decoration:none}
+  nav .label a{color:var(--slate);text-decoration:none}
+  nav .label a:hover{color:var(--type)}
+  header.about{padding-top:var(--s5);padding-bottom:var(--s4)}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.1;font-weight:600;
+    letter-spacing:-0.02em;margin:var(--s3) 0}
+  .lede{color:var(--dim);max-width:60ch}
+  section.sec{border-top:1px solid var(--hair);
+    padding-top:var(--s4);padding-bottom:var(--s4)}
+  h2{font-size:21px;font-weight:600;letter-spacing:-0.01em;margin:var(--s2) 0 var(--s2)}
+  .sec p{color:var(--dim);max-width:66ch;margin-bottom:var(--s2)}
+  ol.steps{list-style:none;counter-reset:st;max-width:66ch}
+  ol.steps li{counter-increment:st;border-left:2px solid var(--emerald);
+    padding:2px 0 2px var(--s2);margin-bottom:var(--s3)}
+  ol.steps li::before{content:counter(st,decimal-leading-zero);
+    font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--slate);display:block}
+  ol.steps strong{display:block;margin:2px 0 4px}
+  ol.steps span{color:var(--dim)}
+  ul.plain{list-style:none;max-width:66ch}
+  ul.plain li{padding-left:var(--s2);margin-bottom:var(--s1);
+    border-left:1px solid var(--slate);color:var(--dim)}
+  ul.plain li strong{color:var(--type)}
+  details{border-top:1px solid var(--hair);max-width:66ch}
+  details:last-of-type{border-bottom:1px solid var(--hair)}
+  summary{cursor:pointer;padding:var(--s2) 0;font-weight:500;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";float:right;color:var(--slate)}
+  details[open] summary::after{content:"\2212"}
+  details p{color:var(--dim);padding-bottom:var(--s2)}
+  .langs{display:flex;flex-wrap:wrap;gap:var(--s1) var(--s2);max-width:66ch}
+  .langs a{color:var(--slate);text-decoration:none;font-size:13px}
+  .langs a:hover{color:var(--type)}
+  .langs a[aria-current]{color:var(--type);border-bottom:1px solid var(--emerald)}
+  footer{border-top:1px solid var(--slate);padding-top:var(--s4);padding-bottom:var(--s5)}
+  footer .pad{display:flex;justify-content:space-between;gap:var(--s2);
+    flex-wrap:wrap;color:var(--slate);font-size:13px}
+  footer a{color:var(--slate);text-decoration:none}
+  footer a:hover{color:var(--type)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="rail pad nav-row">
+    <a class="wordmark" href="/">AURA&nbsp;OMNIMESH</a>
+    <span class="label"><a href="/">Beranda</a></span>
+  </div>
+</nav>
+
+<div class="rail">
+  <header class="about pad">
+    <span class="label">Tentang</span>
+    <h1>Bertukar tanpa infrastruktur.</h1>
+    <p class="lede">Aura OmniMesh adalah protokol pertukaran terbuka yang local-first. Ponsel-ponsel dalam satu ruangan saling menemukan, memublikasikan penawaran dan kebutuhan yang ditandatangani, lalu menemukan lingkaran barter tertutup — siklus di mana setiap orang memberi satu hal dan menerima satu hal. Tanpa server, tanpa akun, tanpa internet.</p>
+  </header>
+
+  <main>
+    <section class="sec pad">
+      <span class="label">Definisi</span>
+      <h2>Apa itu Aura OmniMesh</h2>
+      <p>Aura OmniMesh adalah protokol sekaligus aplikasi gratis untuk pertukaran langsung antara orang-orang yang berdekatan secara fisik. Setiap perangkat memublikasikan <em>intent</em> singkat yang ditandatangani — sebuah penawaran (“saya mengajar gitar”) atau kebutuhan (“butuh bantuan pindahan”) — dan model AI kecil yang berjalan di ponsel itu sendiri mencocokkannya menjadi lingkaran tertutup berisi tiga sampai tujuh peserta.</p>
+      <p>Semua yang biasanya membuat sebuah marketplace membutuhkan perusahaan — identitas, pencocokan, kepercayaan, riwayat — dikerjakan sendiri oleh perangkat, secara kriptografis. Hasilnya: jaringan pertukaran yang tetap bekerja di tempat uang, bank, atau internet tidak berfungsi.</p>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Motivasi</span>
+      <h2>Mengapa dibuat</h2>
+      <p>Barter langsung biasanya gagal karena alasan matematis: orang yang punya apa yang Anda butuhkan jarang membutuhkan apa yang Anda punya. Para ekonom menyebutnya <em>kebetulan ganda kebutuhan</em>. Lingkaran menyelesaikannya: A mengajar B, B meminjamkan ke C, C memasok A — siklus tertutup meski tak ada pasangan yang cocok secara langsung.</p>
+      <p>Alasan kedua adalah kemandirian. Semua marketplace yang ada berjalan di atas server dan akun — perusahaan yang bisa mati, menyensor iklan, menaikkan biaya, atau memanen data. OmniMesh menghapus perantara sebagai fakta arsitektur, bukan sebagai janji: memang tidak ada server yang harus dipercaya, disita, atau dimatikan.</p>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Protokol</span>
+      <h2>Cara kerjanya</h2>
+      <ol class="steps">
+      <li><strong>Identitas adalah kunci, bukan akun.</strong><span>Saat pertama dijalankan, perangkat membuat sepasang kunci Ed25519. Kunci privat tidak pernah meninggalkan perangkat. Tanpa pendaftaran, tanpa email, tanpa nomor telepon — kunci Anda adalah identitas Anda.</span></li>
+      <li><strong>Intent adalah teks yang ditandatangani.</strong><span>Anda memublikasikan penawaran dan kebutuhan dalam kalimat pendek. Model bahasa multibahasa di ponsel mengubah setiap kalimat menjadi vektor semantik, sehingga pencocokan bekerja lintas bahasa.</span></li>
+      <li><strong>Perangkat saling bertukar log bersama.</strong><span>Ponsel-ponsel terdekat bertukar log operasi bertanda tangan lewat Bluetooth LE, Wi-Fi Direct, atau jaringan lokal bersama. Log itu adalah CRDT: tak bergantung urutan dan tahan partisi jaringan, sehingga semua perangkat mencapai keadaan yang sama tanpa koordinator.</span></li>
+      <li><strong>Semua diverifikasi, tak ada yang diasumsikan.</strong><span>Setiap operasi diperiksa: tanda tangan, kepengarangan, aturan protokol. Tanda tangan yang sah di bawah kunci yang salah tetap ditolak — hanya pemilik intent yang bisa mengubah statusnya. Reputasi tidak pernah diterima dari jaringan; setiap perangkat menghitung ulang secara lokal dari riwayat pertukaran selesai yang ditandatangani.</span></li>
+      <li><strong>Pencocok mencari siklus tertutup.</strong><span>Perangkat menelusuri graf lokal penawaran dan kebutuhan untuk mencari lingkaran berisi 3–7 peserta. Pencariannya deterministik: data yang sama menghasilkan lingkaran yang sama di ponsel mana pun.</span></li>
+      <li><strong>Lingkaran terkunci, orang bertukar, riwayat tertandatangani.</strong><span>Setiap peserta mengunci langkahnya; ketika semua terkunci, lingkaran terkonfirmasi. Orang-orang bertemu, bertukar, dan menandai pemenuhan. Setiap tahap adalah operasi bertanda tangan — mundur di tengah jalan memutus lingkaran secara terlihat bagi semua.</span></li>
+      </ol>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Masalah</span>
+      <h2>Apa yang diselesaikan</h2>
+      <ul class="plain">
+      <li><strong>Pertukaran saat uang lemah atau tidak ada</strong> — inflasi, kelangkaan uang tunai, komunitas tanpa bank.</li>
+      <li><strong>Marketplace tanpa biaya, akun, atau server</strong> — tak ada yang perlu dibayar, tak ada tempat mendaftar.</li>
+      <li><strong>Bekerja sepenuhnya offline</strong> — bencana, pemadaman listrik, daerah terpencil, festival, kapal, perkemahan.</li>
+      <li><strong>Privasi lewat konstruksi</strong> — tak ada yang keluar dari perangkat kecuali yang Anda publikasikan secara eksplisit ke peer terdekat.</li>
+      <li><strong>Pencocokan multilateral</strong> — siklus yang secara matematis mustahil ditutup oleh barter dua orang.</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Untuk siapa</span>
+      <h2>Untuk siapa ini dibuat</h2>
+      <ul class="plain">
+      <li>Kampung, desa, dan jaringan gotong royong yang menginginkan papan pertukaran lokal tanpa operator.</li>
+      <li>Coworking, kampus, konferensi, dan festival — ruang padat yang penuh keterampilan saling melengkapi.</li>
+      <li>Komunitas di zona bencana atau pemadaman, di mana kemandirian dari infrastruktur adalah tujuannya.</li>
+      <li>Orang-orang yang menolak menyerahkan riwayat transaksinya ke perusahaan demi layanan pencocokan.</li>
+      <li>Peneliti dan pengembang sistem peer-to-peer — protokol dan kodenya terbuka di GitHub.</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Prinsip</span>
+      <h2>Prinsip desain</h2>
+      <ul class="plain">
+      <li><strong>Local-first.</strong> Data Anda tinggal di basis data tertanam di perangkat Anda. Log bertanda tangan adalah sumber kebenaran; menghapus aplikasi berarti menghapus data.</li>
+      <li><strong>Nol pengumpulan.</strong> Tanpa analitik, tanpa telemetri, tanpa akun. Tidak ada backend perusahaan tempat mengirim apa pun.</li>
+      <li><strong>Fail-closed.</strong> Apa pun yang tak bisa diverifikasi akan ditolak — tidak pernah ditebak, tidak pernah diasumsikan.</li>
+      <li><strong>Determinisme.</strong> Semua perangkat menghitung pencocokan yang identik dari data yang identik; kebenaran tidak bergantung pada siapa yang menjalankan kode.</li>
+      <li><strong>Jujur soal batasan.</strong> Protokol mendokumentasikan apa yang tidak dilakukannya, dengan bahasa lugas, di bawah ini.</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Batasan</span>
+      <h2>Ini bukan</h2>
+      <ul class="plain">
+      <li>Bukan sistem pembayaran: tanpa token, tanpa saldo, tanpa kustodi. Versi 1 adalah barter murni barang, jasa, dan waktu.</li>
+      <li>Bukan jaringan global: jangkauan dibatasi radio dan jaringan lokal. Ini jaringan skala lingkungan — memang dirancang begitu.</li>
+      <li>Tidak kebal Sybil: siapa pun bisa membuat kunci. Reputasi diperoleh dari lingkaran yang selesai, tidak pernah diberikan begitu saja.</li>
+      <li>iOS dan Android tidak terhubung langsung lewat radio (API platform berbeda); lalu lintas lintas-OS melewati jembatan jaringan lokal.</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">FAQ</span>
+      <h2>Pertanyaan umum</h2>
+      <details>
+        <summary>Apakah gratis?</summary>
+        <p>Ya — gratis dan open source, tanpa iklan dan tak ada yang dijual. Tidak ada server yang harus dibiayai, jadi tidak ada yang perlu dimonetisasi.</p>
+      </details>
+      <details>
+        <summary>Bahasa apa saja yang dipahami pencocokan?</summary>
+        <p>Model di perangkat bersifat multibahasa: penawaran yang ditulis dalam satu bahasa bisa cocok dengan kebutuhan dalam bahasa lain. Saat ini bahasa Inggris dan Rusia sudah tervalidasi; keluarga modelnya mencakup puluhan bahasa.</p>
+      </details>
+      <details>
+        <summary>Bisakah saya membangun hal lain di atas protokol ini?</summary>
+        <p>Bisa. Lapisan-lapisannya — transport, log CRDT bertanda tangan, pencocok semantik — dapat dipisah, dan kode sumbernya publik di GitHub, di repositori proyek.</p>
+      </details>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Bahasa</span>
+      <div class="langs">
+        <a href="/about/" hreflang="en" lang="en">English</a>
+        <a href="/about/es/" hreflang="es" lang="es">Español</a>
+        <a href="/about/hi/" hreflang="hi" lang="hi">हिन्दी</a>
+        <a href="/about/id/" hreflang="id" lang="id" aria-current="page">Bahasa Indonesia</a>
+        <a href="/about/ja/" hreflang="ja" lang="ja">日本語</a>
+        <a href="/about/ko/" hreflang="ko" lang="ko">한국어</a>
+        <a href="/about/pt/" hreflang="pt" lang="pt">Português</a>
+        <a href="/about/ru/" hreflang="ru" lang="ru">Русский</a>
+        <a href="/about/uk/" hreflang="uk" lang="uk">Українська</a>
+        <a href="/about/zh/" hreflang="zh" lang="zh">中文</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="pad">
+      <span>AURA OMNIMESH — protokol pertukaran local-first. Nol server sejak dirancang.</span>
+      <span>
+        <a href="/privacy.html">Privacy</a> &nbsp;&middot;&nbsp;
+        <a href="/terms.html">Terms</a> &nbsp;&middot;&nbsp;
+        <a href="https://github.com/rf24kja/aura-omnimesh" rel="noopener">GitHub</a>
+      </span>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

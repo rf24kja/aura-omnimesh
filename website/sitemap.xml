@@ -1,6 +1,137 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url><loc>https://aura-omnimesh.pages.dev/</loc><priority>1.0</priority></url>
+  <url><loc>https://aura-omnimesh.pages.dev/about/</loc><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/"/>
+  </url>
+  <url><loc>https://aura-omnimesh.pages.dev/about/es/</loc><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/"/>
+  </url>
+  <url><loc>https://aura-omnimesh.pages.dev/about/hi/</loc><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/"/>
+  </url>
+  <url><loc>https://aura-omnimesh.pages.dev/about/id/</loc><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/"/>
+  </url>
+  <url><loc>https://aura-omnimesh.pages.dev/about/ja/</loc><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/"/>
+  </url>
+  <url><loc>https://aura-omnimesh.pages.dev/about/ko/</loc><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/"/>
+  </url>
+  <url><loc>https://aura-omnimesh.pages.dev/about/pt/</loc><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/"/>
+  </url>
+  <url><loc>https://aura-omnimesh.pages.dev/about/ru/</loc><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/"/>
+  </url>
+  <url><loc>https://aura-omnimesh.pages.dev/about/uk/</loc><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/"/>
+  </url>
+  <url><loc>https://aura-omnimesh.pages.dev/about/zh/</loc><priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/"/>
+    <xhtml:link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/"/>
+  </url>
   <url><loc>https://aura-omnimesh.pages.dev/privacy.html</loc><priority>0.5</priority></url>
   <url><loc>https://aura-omnimesh.pages.dev/terms.html</loc><priority>0.5</priority></url>
 </urlset>

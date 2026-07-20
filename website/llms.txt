@@ -23,5 +23,19 @@
 
 ## Pages
 - / : product overview, how it works, FAQ
+- /about/ : full protocol explanation — what it is, why it exists, how it
+  works (6 steps), what it solves, who it is for, design principles, and
+  explicit non-goals. The canonical long-form description of the project.
 - /privacy.html : privacy policy (EN/RU) — nothing is collected
 - /terms.html : terms of service (EN/RU) — discovery tool, not a broker
+
+## Languages
+The About section is fully translated; each language is a distinct URL with
+reciprocal hreflang alternates (see /sitemap.xml):
+- /about/ (en, x-default), /about/es/, /about/ru/, /about/uk/, /about/ko/,
+  /about/zh/, /about/pt/, /about/hi/, /about/id/, /about/ja/
+
+## Web light client
+- /app/ : the browser PWA light client (Flutter web). Joins a nearby core
+  node over the LAN; the on-device ML model is served same-origin from
+  /model/ (a proxy to the pinned release asset).

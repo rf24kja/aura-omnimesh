@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="pt" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sobre o Aura OmniMesh — um protocolo de escambo local, sem servidores</title>
+<meta name="description" content="O que é o Aura OmniMesh, por que ele existe e como funciona: um protocolo aberto que encontra círculos de troca multilaterais entre celulares próximos — sem servidores, sem contas e sem internet.">
+<link rel="canonical" href="https://aura-omnimesh.pages.dev/about/pt/">
+<link rel="alternate" hreflang="en" href="https://aura-omnimesh.pages.dev/about/">
+<link rel="alternate" hreflang="es" href="https://aura-omnimesh.pages.dev/about/es/">
+<link rel="alternate" hreflang="hi" href="https://aura-omnimesh.pages.dev/about/hi/">
+<link rel="alternate" hreflang="id" href="https://aura-omnimesh.pages.dev/about/id/">
+<link rel="alternate" hreflang="ja" href="https://aura-omnimesh.pages.dev/about/ja/">
+<link rel="alternate" hreflang="ko" href="https://aura-omnimesh.pages.dev/about/ko/">
+<link rel="alternate" hreflang="pt" href="https://aura-omnimesh.pages.dev/about/pt/">
+<link rel="alternate" hreflang="ru" href="https://aura-omnimesh.pages.dev/about/ru/">
+<link rel="alternate" hreflang="uk" href="https://aura-omnimesh.pages.dev/about/uk/">
+<link rel="alternate" hreflang="zh" href="https://aura-omnimesh.pages.dev/about/zh/">
+<link rel="alternate" hreflang="x-default" href="https://aura-omnimesh.pages.dev/about/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sobre o Aura OmniMesh — um protocolo de escambo local, sem servidores">
+<meta property="og:description" content="O que é o Aura OmniMesh, por que ele existe e como funciona: um protocolo aberto que encontra círculos de troca multilaterais entre celulares próximos — sem servidores, sem contas e sem internet.">
+<meta property="og:url" content="https://aura-omnimesh.pages.dev/about/pt/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#111111">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "AboutPage",
+ "name": "Sobre o Aura OmniMesh — um protocolo de escambo local, sem servidores",
+ "description": "O que é o Aura OmniMesh, por que ele existe e como funciona: um protocolo aberto que encontra círculos de troca multilaterais entre celulares próximos — sem servidores, sem contas e sem internet.",
+ "inLanguage": "pt",
+ "url": "https://aura-omnimesh.pages.dev/about/pt/",
+ "isPartOf": {
+  "@type": "WebSite",
+  "name": "Aura OmniMesh",
+  "url": "https://aura-omnimesh.pages.dev/"
+ }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "inLanguage": "pt",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "É gratuito?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Sim — gratuito e de código aberto, sem anúncios e sem nada à venda. Não há servidores para sustentar, então não há o que monetizar."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Quais idiomas o matching entende?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "O modelo no dispositivo é multilíngue: uma oferta escrita num idioma pode combinar com uma necessidade escrita em outro. Inglês e russo estão validados hoje; a família de modelos cobre dezenas de idiomas."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Posso construir outra coisa sobre o protocolo?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Sim. As camadas — transporte, registro CRDT assinado, matcher semântico — são separáveis, e o código-fonte é público no GitHub, no repositório do projeto."
+   }
+  }
+ ]
+}
+</script>
+<style>
+  :root{--obsidian:#111111;--carbon:#181818;--type:#ffffff;
+    --dim:rgba(255,255,255,.70);--slate:#777777;--hair:rgba(119,119,119,.25);
+    --emerald:#2FBF71;--s1:8px;--s2:16px;--s3:24px;--s4:32px;--s5:48px;--s6:96px;
+    --maxw:960px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--obsidian);color:var(--type);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",
+    "Noto Sans","Noto Sans KR","Noto Sans SC","Noto Sans JP","Noto Sans Devanagari",
+    Arial,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  ::selection{background:rgba(255,255,255,.2)}
+  a{color:var(--type)}
+  .rail{max-width:var(--maxw);margin:0 auto;
+    border-left:1px solid var(--slate);border-right:1px solid var(--slate)}
+  @media (max-width:1000px){.rail{border-left:0;border-right:0}}
+  .pad{padding-left:var(--s3);padding-right:var(--s3)}
+  .label{font-size:11px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--slate)}
+  nav{border-bottom:1px solid var(--slate);position:sticky;top:0;
+    background:var(--obsidian);z-index:10}
+  .nav-row{display:flex;align-items:center;justify-content:space-between;
+    padding-top:var(--s2);padding-bottom:var(--s2)}
+  .wordmark{font-size:13px;font-weight:600;letter-spacing:.18em;text-decoration:none}
+  nav .label a{color:var(--slate);text-decoration:none}
+  nav .label a:hover{color:var(--type)}
+  header.about{padding-top:var(--s5);padding-bottom:var(--s4)}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.1;font-weight:600;
+    letter-spacing:-0.02em;margin:var(--s3) 0}
+  .lede{color:var(--dim);max-width:60ch}
+  section.sec{border-top:1px solid var(--hair);
+    padding-top:var(--s4);padding-bottom:var(--s4)}
+  h2{font-size:21px;font-weight:600;letter-spacing:-0.01em;margin:var(--s2) 0 var(--s2)}
+  .sec p{color:var(--dim);max-width:66ch;margin-bottom:var(--s2)}
+  ol.steps{list-style:none;counter-reset:st;max-width:66ch}
+  ol.steps li{counter-increment:st;border-left:2px solid var(--emerald);
+    padding:2px 0 2px var(--s2);margin-bottom:var(--s3)}
+  ol.steps li::before{content:counter(st,decimal-leading-zero);
+    font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--slate);display:block}
+  ol.steps strong{display:block;margin:2px 0 4px}
+  ol.steps span{color:var(--dim)}
+  ul.plain{list-style:none;max-width:66ch}
+  ul.plain li{padding-left:var(--s2);margin-bottom:var(--s1);
+    border-left:1px solid var(--slate);color:var(--dim)}
+  ul.plain li strong{color:var(--type)}
+  details{border-top:1px solid var(--hair);max-width:66ch}
+  details:last-of-type{border-bottom:1px solid var(--hair)}
+  summary{cursor:pointer;padding:var(--s2) 0;font-weight:500;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";float:right;color:var(--slate)}
+  details[open] summary::after{content:"\2212"}
+  details p{color:var(--dim);padding-bottom:var(--s2)}
+  .langs{display:flex;flex-wrap:wrap;gap:var(--s1) var(--s2);max-width:66ch}
+  .langs a{color:var(--slate);text-decoration:none;font-size:13px}
+  .langs a:hover{color:var(--type)}
+  .langs a[aria-current]{color:var(--type);border-bottom:1px solid var(--emerald)}
+  footer{border-top:1px solid var(--slate);padding-top:var(--s4);padding-bottom:var(--s5)}
+  footer .pad{display:flex;justify-content:space-between;gap:var(--s2);
+    flex-wrap:wrap;color:var(--slate);font-size:13px}
+  footer a{color:var(--slate);text-decoration:none}
+  footer a:hover{color:var(--type)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="rail pad nav-row">
+    <a class="wordmark" href="/">AURA&nbsp;OMNIMESH</a>
+    <span class="label"><a href="/">Início</a></span>
+  </div>
+</nav>
+
+<div class="rail">
+  <header class="about pad">
+    <span class="label">Sobre</span>
+    <h1>Troca sem infraestrutura.</h1>
+    <p class="lede">O Aura OmniMesh é um protocolo de troca aberto e local-first. Celulares na mesma sala se descobrem, publicam ofertas e necessidades assinadas e encontram círculos de troca fechados — ciclos em que cada pessoa dá uma coisa e recebe outra. Sem servidores, sem contas, sem internet.</p>
+  </header>
+
+  <main>
+    <section class="sec pad">
+      <span class="label">Definição</span>
+      <h2>O que é o Aura OmniMesh</h2>
+      <p>O Aura OmniMesh é um protocolo e um aplicativo gratuito para troca direta entre pessoas fisicamente próximas. Cada dispositivo publica breves <em>intenções</em> assinadas — uma oferta (“dou aulas de violão”) ou uma necessidade (“preciso de ajuda na mudança”) — e um pequeno modelo de IA rodando no próprio celular as combina em círculos fechados de três a sete participantes.</p>
+      <p>Tudo aquilo para que um marketplace normalmente precisa de uma empresa — identidade, matching, confiança, histórico — os próprios dispositivos fazem, criptograficamente. O resultado é uma rede de trocas que continua funcionando onde o dinheiro, os bancos ou a internet não funcionam.</p>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Motivação</span>
+      <h2>Por que ele existe</h2>
+      <p>O escambo direto costuma fracassar por uma razão matemática: quem tem o que você precisa raramente precisa do que você tem. Os economistas chamam isso de <em>dupla coincidência de desejos</em>. Os círculos resolvem o problema: A ensina B, B empresta a C, C abastece A — o ciclo se fecha mesmo que nenhum par combine diretamente.</p>
+      <p>A segunda razão é a independência. Todo marketplace existente roda sobre servidores e contas — uma empresa que pode sair do ar, censurar anúncios, aumentar taxas ou coletar dados. O OmniMesh remove o intermediário como fato arquitetural, não como promessa: simplesmente não existe servidor para confiar, intimar ou desligar.</p>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Protocolo</span>
+      <h2>Como funciona</h2>
+      <ol class="steps">
+      <li><strong>Identidade é uma chave, não uma conta.</strong><span>Na primeira execução, o dispositivo gera um par de chaves Ed25519. A chave privada nunca sai do dispositivo. Sem cadastro, sem e-mail, sem número de telefone — sua chave é a sua identidade.</span></li>
+      <li><strong>Intenções são texto assinado.</strong><span>Você publica ofertas e necessidades em frases curtas. Um modelo de linguagem multilíngue rodando no celular converte cada uma em um vetor semântico, então o matching funciona entre idiomas diferentes.</span></li>
+      <li><strong>Os dispositivos trocam um registro compartilhado.</strong><span>Celulares próximos trocam registros de operações assinadas por Bluetooth LE, Wi-Fi Direct ou rede local compartilhada. O registro é um CRDT: independente de ordem e tolerante a partições, todos os dispositivos convergem para o mesmo estado sem coordenador.</span></li>
+      <li><strong>Tudo é verificado, nada é presumido.</strong><span>Cada operação é checada: assinatura, autoria, regras do protocolo. Uma assinatura válida sob a chave errada é rejeitada mesmo assim — só o dono de uma intenção pode mudar seu status. A reputação nunca é aceita da rede; cada dispositivo a recalcula localmente a partir de trocas concluídas e assinadas.</span></li>
+      <li><strong>Um buscador procura ciclos fechados.</strong><span>O dispositivo varre o grafo local de ofertas e necessidades em busca de círculos de 3 a 7 participantes. A busca é determinística: os mesmos dados produzem os mesmos círculos em qualquer celular.</span></li>
+      <li><strong>O círculo trava, as pessoas trocam, o histórico fica assinado.</strong><span>Cada participante trava a sua etapa; quando todas estão travadas, o círculo é confirmado. As pessoas se encontram, trocam e marcam o cumprimento. Cada estágio é uma operação assinada — desistir quebra o círculo de forma visível para todos.</span></li>
+      </ol>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Problemas</span>
+      <h2>O que ele resolve</h2>
+      <ul class="plain">
+      <li><strong>Troca quando o dinheiro está fraco ou ausente</strong> — inflação, escassez de dinheiro vivo, comunidades sem banco.</li>
+      <li><strong>Marketplaces sem taxas, contas ou servidores</strong> — nada a pagar, ninguém com quem se cadastrar.</li>
+      <li><strong>Funcionamento totalmente offline</strong> — desastres, apagões, áreas remotas, festivais, embarcações, acampamentos.</li>
+      <li><strong>Privacidade por construção</strong> — nada sai do dispositivo além do que você publica explicitamente aos vizinhos.</li>
+      <li><strong>Matching multilateral</strong> — os ciclos que o escambo entre duas pessoas matematicamente não consegue fechar.</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Público</span>
+      <h2>Para quem é</h2>
+      <ul class="plain">
+      <li>Bairros, vilarejos e redes de apoio mútuo que querem um mural de trocas local sem operador.</li>
+      <li>Coworkings, campi, conferências e festivais — espaços densos, cheios de habilidades complementares.</li>
+      <li>Comunidades em zonas de desastre ou apagão, onde a independência da infraestrutura é o próprio objetivo.</li>
+      <li>Pessoas que se recusam a entregar seu histórico de trocas a uma empresa em troca de um serviço de matching.</li>
+      <li>Pesquisadores e desenvolvedores de sistemas peer-to-peer — o protocolo e o código estão abertos no GitHub.</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Princípios</span>
+      <h2>Princípios de projeto</h2>
+      <ul class="plain">
+      <li><strong>Local-first.</strong> Seus dados vivem num banco embutido no seu dispositivo. O registro assinado é a fonte da verdade; apagar o app apaga os dados.</li>
+      <li><strong>Coleta zero.</strong> Sem analytics, sem telemetria, sem contas. Não existe backend de empresa para onde enviar qualquer coisa.</li>
+      <li><strong>Fail-closed.</strong> O que não pode ser verificado é rejeitado — nunca adivinhado, nunca presumido.</li>
+      <li><strong>Determinismo.</strong> Todos os dispositivos calculam os mesmos matchings a partir dos mesmos dados; a correção não depende de quem roda o código.</li>
+      <li><strong>Honestidade sobre os limites.</strong> O protocolo documenta o que ele não faz, em linguagem clara, logo abaixo.</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Limites</span>
+      <h2>O que ele não é</h2>
+      <ul class="plain">
+      <li>Não é um sistema de pagamentos: sem tokens, sem saldos, sem custódia. A versão 1 é escambo puro de bens, serviços e tempo.</li>
+      <li>Não é global: o alcance é limitado pelo rádio e pelas redes locais. É uma rede em escala de bairro, por projeto.</li>
+      <li>Não é à prova de Sybil: qualquer um pode criar uma chave. Reputação se ganha com círculos concluídos, nunca é concedida.</li>
+      <li>iOS e Android não pareiam diretamente pelo rádio (as APIs das plataformas diferem); o tráfego entre sistemas passa por uma ponte de rede local.</li>
+      </ul>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">FAQ</span>
+      <h2>Perguntas frequentes</h2>
+      <details>
+        <summary>É gratuito?</summary>
+        <p>Sim — gratuito e de código aberto, sem anúncios e sem nada à venda. Não há servidores para sustentar, então não há o que monetizar.</p>
+      </details>
+      <details>
+        <summary>Quais idiomas o matching entende?</summary>
+        <p>O modelo no dispositivo é multilíngue: uma oferta escrita num idioma pode combinar com uma necessidade escrita em outro. Inglês e russo estão validados hoje; a família de modelos cobre dezenas de idiomas.</p>
+      </details>
+      <details>
+        <summary>Posso construir outra coisa sobre o protocolo?</summary>
+        <p>Sim. As camadas — transporte, registro CRDT assinado, matcher semântico — são separáveis, e o código-fonte é público no GitHub, no repositório do projeto.</p>
+      </details>
+    </section>
+
+    <section class="sec pad">
+      <span class="label">Idiomas</span>
+      <div class="langs">
+        <a href="/about/" hreflang="en" lang="en">English</a>
+        <a href="/about/es/" hreflang="es" lang="es">Español</a>
+        <a href="/about/hi/" hreflang="hi" lang="hi">हिन्दी</a>
+        <a href="/about/id/" hreflang="id" lang="id">Bahasa Indonesia</a>
+        <a href="/about/ja/" hreflang="ja" lang="ja">日本語</a>
+        <a href="/about/ko/" hreflang="ko" lang="ko">한국어</a>
+        <a href="/about/pt/" hreflang="pt" lang="pt" aria-current="page">Português</a>
+        <a href="/about/ru/" hreflang="ru" lang="ru">Русский</a>
+        <a href="/about/uk/" hreflang="uk" lang="uk">Українська</a>
+        <a href="/about/zh/" hreflang="zh" lang="zh">中文</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="pad">
+      <span>AURA OMNIMESH — um protocolo de troca local-first. Zero servidores por projeto.</span>
+      <span>
+        <a href="/privacy.html">Privacy</a> &nbsp;&middot;&nbsp;
+        <a href="/terms.html">Terms</a> &nbsp;&middot;&nbsp;
+        <a href="https://github.com/rf24kja/aura-omnimesh" rel="noopener">GitHub</a>
+      </span>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
