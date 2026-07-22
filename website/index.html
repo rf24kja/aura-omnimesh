@@ -392,7 +392,7 @@
           directly — tap the file, then allow install from unknown sources
           when your phone asks. No store account, no gatekeeper.</p>
           <a class="btn primary"
-             href="https://github.com/rf24kja/aura-omnimesh/releases/download/v1.0.0/app-release.apk"
+             href="https://github.com/rf24kja/aura-omnimesh/releases/download/v1.0.0/app-arm64-v8a-release.apk"
              rel="noopener">Download&nbsp;APK</a>
         </div>
         <div class="store">
@@ -403,8 +403,13 @@
           <a class="btn primary" href="/app/" rel="noopener">Launch&nbsp;web&nbsp;client</a>
         </div>
       </div>
+      <p class="fineprint">The Download APK is the arm64 build (~86&nbsp;MB) — it
+      fits virtually every phone made since ~2019. For an older 32-bit device or
+      an x86 emulator, use the
+      <a href="https://github.com/rf24kja/aura-omnimesh/releases/download/v1.0.0/app-release.apk"
+      rel="noopener">universal build (155&nbsp;MB)</a>.</p>
       <p class="fineprint">iOS apps install only through the App Store — that is
-      an Apple platform rule, not our choice. The direct APK is signed with our
+      an Apple platform rule, not our choice. Every APK is signed with our
       release key; before installing, verify the certificate SHA-256 with
       <code>apksigner verify --print-certs</code> against the fingerprint in
       <a href="https://github.com/rf24kja/aura-omnimesh/blob/main/SECURITY.md"

@@ -70,15 +70,17 @@ Being honest about non-goals is part of the security posture:
 
 ## Verifying an Android build
 
-The APK published on the releases page is signed with the project release
-key. Because it is installed outside Google Play, verify the signing
-certificate before trusting a download — this is what proves the file came
-from this project and was not tampered with in transit.
+Every APK we publish — the default arm64 build
+(`app-arm64-v8a-release.apk`) and the universal fallback
+(`app-release.apk`) — is signed with the same project release key. Because
+it is installed outside Google Play, verify the signing certificate before
+trusting a download — this is what proves the file came from this project
+and was not tampered with in transit.
 
 Run, against the file you downloaded:
 
 ```
-apksigner verify --print-certs app-release.apk
+apksigner verify --print-certs <the-file-you-downloaded>.apk
 ```
 
 and confirm the SHA-256 digest matches:
