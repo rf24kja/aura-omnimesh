@@ -72,8 +72,11 @@ class NearbyTransportChannel(context: Context) :
     private val endpointByKey = HashMap<String, String>()
     private val connectedEndpoints = HashSet<String>()
 
-    /** msgId -> (received count, slots). */
-    private val reassembly = LinkedHashMap<String, Array<String?>>()
+    /** msgId -> raw byte slices per index. Reassembly is byte-level: a
+     *  multibyte UTF-8 character split across a 24 KB chunk boundary must
+     *  survive intact, or the reassembled payload differs from the signed
+     *  original and fails Ed25519 verification. */
+    private val reassembly = LinkedHashMap<String, Array<ByteArray?>>()
 
     // -----------------------------------------------------------------
     // Method channel
@@ -293,13 +296,29 @@ class NearbyTransportChannel(context: Context) :
     private val payloadCallback = object : PayloadCallback() {
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
             val bytes = payload.asBytes() ?: return
-            val text = String(bytes, UTF_8)
-            // Header = 4 pipe-separated fields; slice follows the 4th pipe.
-            val parts = text.split('|', limit = 5)
-            if (parts.size != 5 || parts[0] != FRAME_MAGIC) return
-            val msgId = parts[1]
-            val index = parts[2].toIntOrNull() ?: return
-            val total = parts[3].toIntOrNull() ?: return
+            // Locate the ASCII header "AOM1|msgId|index|total|" at the BYTE
+            // level, then keep the slice as RAW BYTES. Decoding each chunk
+            // as its own UTF-8 String (as the old code did) corrupts any
+            // multibyte character split across a 24 KB boundary into U+FFFD —
+            // and a single changed byte fails the CRDT Ed25519 signature,
+            // silently dropping large multilingual batches. '|' (0x7C) never
+            // occurs inside a multibyte UTF-8 sequence, so scanning for the
+            // 4 header pipes is byte-safe even when the slice contains '|'.
+            val pipe = '|'.code.toByte()
+            var pipes = 0
+            var sliceStart = -1
+            for (i in bytes.indices) {
+                if (bytes[i] == pipe && ++pipes == 4) {
+                    sliceStart = i + 1
+                    break
+                }
+            }
+            if (sliceStart < 0) return
+            val header = String(bytes, 0, sliceStart, UTF_8).split('|')
+            if (header.size < 4 || header[0] != FRAME_MAGIC) return
+            val msgId = header[1]
+            val index = header[2].toIntOrNull() ?: return
+            val total = header[3].toIntOrNull() ?: return
             if (total <= 0 || index !in 0 until total) return
 
             val slots = reassembly.getOrPut(msgId) {
@@ -314,13 +333,19 @@ class NearbyTransportChannel(context: Context) :
                 reassembly.remove(msgId)
                 return
             }
-            slots[index] = parts[4]
+            slots[index] = bytes.copyOfRange(sliceStart, bytes.size)
             if (slots.all { it != null }) {
                 reassembly.remove(msgId)
+                val full = ByteArray(slots.sumOf { it!!.size })
+                var off = 0
+                for (slice in slots) {
+                    slice!!.copyInto(full, off)
+                    off += slice.size
+                }
                 emit(
                     mapOf(
                         "type" to "payloadReceived",
-                        "payload" to slots.joinToString(""),
+                        "payload" to String(full, UTF_8),
                     )
                 )
             }
