@@ -21,9 +21,15 @@ MODEL_URL="${1:-/model/minilm_multilingual_trimmed_v2.onnx}"
 MODEL_ASSET="build/web/assets/assets/models/minilm_multilingual_trimmed_v2.onnx"
 
 echo "Building web with AURA_WEB_MODEL_URL=$MODEL_URL"
+# --no-web-resources-cdn: bundle CanvasKit locally and load it from the same
+# origin (/app/canvaskit/) instead of www.gstatic.com. Our strict /app CSP
+# only allows 'self', so the CDN CanvasKit is blocked and the engine never
+# renders (white screen). Local CanvasKit also honours the local-first,
+# zero-external-requests promise.
 # MSYS_NO_PATHCONV: Git Bash on Windows otherwise rewrites /app/ and the
 # leading-slash MODEL_URL into C:/Program Files/Git/... paths.
 MSYS_NO_PATHCONV=1 flutter build web --release \
+  --no-web-resources-cdn \
   --base-href /app/ \
   --dart-define="AURA_WEB_MODEL_URL=$MODEL_URL"
 

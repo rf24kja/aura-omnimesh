@@ -27063,7 +27063,7 @@ $S:2}
 A.ati.prototype={
 $1(a){var s=A.df().b
 s=s==null?null:s.canvasKitBaseUrl
-return(s==null?"https://www.gstatic.com/flutter-canvaskit/83675ed27633283e7fc296c8bca22e841224c096/":s)+a},
+return(s==null?"canvaskit/":s)+a},
 $S:111}
 A.IG.prototype={
 WI(){var s=this.EE(),r=$.bf.b2().ImageFilter.MakeColorFilter(s,null)

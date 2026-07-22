@@ -44,3 +44,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /tool/ring_probe_state*.json
+
+# Wrangler (Cloudflare) local cache/state — never commit
+.wrangler/
