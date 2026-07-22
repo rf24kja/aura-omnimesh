@@ -162,6 +162,12 @@ Future<AppServices> bootstrap() async {
     if (bridgeEndpoint.scheme != 'ws' && bridgeEndpoint.scheme != 'wss') {
       throw const PairingRequiredException();
     }
+    // Browsers forbid an insecure ws:// connection from an https:// page
+    // (mixed content). Catch it here with an actionable message instead of
+    // a raw SecurityError surfacing deep in the socket layer.
+    if (Uri.base.scheme == 'https' && bridgeEndpoint.scheme == 'ws') {
+      throw const InsecureBridgeSchemeException();
+    }
   }
   final transport =
       MeshTransportFactory.create(lightClientEndpoint: bridgeEndpoint);
@@ -291,6 +297,14 @@ Future<AppServices> bootstrap() async {
 /// Web launched without a ?bridge=ws://host:port pairing parameter.
 class PairingRequiredException implements Exception {
   const PairingRequiredException();
+}
+
+/// Web served over HTTPS was pointed at a plaintext ws:// bridge. Browsers
+/// forbid insecure WebSocket connections from a secure page (mixed content),
+/// so this can never connect. Serve the client over http on the same LAN as
+/// the Core Node, or give the Core Node a wss:// endpoint.
+class InsecureBridgeSchemeException implements Exception {
+  const InsecureBridgeSchemeException();
 }
 
 // ---------------------------------------------------------------------------
@@ -1069,7 +1083,16 @@ class _BootErrorScreen extends StatelessWidget {
     if (error is PairingRequiredException) {
       return 'LIGHT CLIENT NOT PAIRED\n\n'
           'Open this PWA with ?bridge=ws://<core-node-ip>:<port>\n'
-          'from the QR code shown on a Core Mesh Node.';
+          'from the QR code shown on a Core Mesh Node.\n\n'
+          'Over https the browser blocks ws:// — run the web client over '
+          'http on the same network, or use the native app.';
+    }
+    if (error is InsecureBridgeSchemeException) {
+      return 'CANNOT CONNECT OVER HTTPS\n\n'
+          'The browser blocks an insecure ws:// bridge from an https:// '
+          'page (mixed content).\n\n'
+          'Run the web client over http on the same network as the Core '
+          'Node, or use the native app.';
     }
     if (error is UnverifiedBridgeException) {
       return 'BRIDGE FAILED VERIFICATION\n\n'
