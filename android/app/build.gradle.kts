@@ -79,4 +79,5 @@ flutter {
 dependencies {
     implementation("com.google.android.gms:play-services-nearby:19.1.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    testImplementation("junit:junit:4.13.2")
 }

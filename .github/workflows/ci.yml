@@ -56,6 +56,13 @@ jobs:
       - name: Build Android (debug)
         run: flutter build apk --debug
 
+      # Native transport framing contract (PayloadFramingTest) — guards the
+      # byte-level chunk reassembly that only otherwise runs on a two-phone
+      # link. Runs after the APK build so the Flutter Gradle project (and
+      # android/local.properties) is fully configured.
+      - name: Native Android unit tests (Kotlin)
+        run: cd android && ./gradlew testDebugUnitTest --console=plain
+
       - name: Build Web
         run: flutter build web
 

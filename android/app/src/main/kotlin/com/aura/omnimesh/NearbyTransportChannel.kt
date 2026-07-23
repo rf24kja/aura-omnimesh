@@ -44,8 +44,6 @@ import com.google.android.gms.nearby.connection.Strategy
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import java.util.UUID
-import kotlin.text.Charsets.UTF_8
 
 class NearbyTransportChannel(context: Context) :
     MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
@@ -54,8 +52,6 @@ class NearbyTransportChannel(context: Context) :
         const val METHOD_NAME = "aura.omnimesh/transport"
         const val EVENT_NAME = "aura.omnimesh/transport_events"
         private const val SERVICE_ID = "aura-omnimesh"
-        private const val CHUNK_BYTES = 24_000
-        private const val FRAME_MAGIC = "AOM1"
         private const val MAX_PENDING_REASSEMBLIES = 64
     }
 
@@ -72,11 +68,9 @@ class NearbyTransportChannel(context: Context) :
     private val endpointByKey = HashMap<String, String>()
     private val connectedEndpoints = HashSet<String>()
 
-    /** msgId -> raw byte slices per index. Reassembly is byte-level: a
-     *  multibyte UTF-8 character split across a 24 KB chunk boundary must
-     *  survive intact, or the reassembled payload differs from the signed
-     *  original and fails Ed25519 verification. */
-    private val reassembly = LinkedHashMap<String, Array<ByteArray?>>()
+    /** Byte-level frame reassembler (see PayloadFraming.kt). Keeping the
+     *  chunking contract in a pure class lets JUnit verify it off-device. */
+    private val reassembler = PayloadReassembler(MAX_PENDING_REASSEMBLIES)
 
     // -----------------------------------------------------------------
     // Method channel
@@ -200,7 +194,7 @@ class NearbyTransportChannel(context: Context) :
         identityByEndpoint.clear()
         endpointByKey.clear()
         connectedEndpoints.clear()
-        reassembly.clear()
+        reassembler.clear()
     }
 
     private fun registerIdentity(endpointId: String, endpointName: String): Boolean {
@@ -279,14 +273,7 @@ class NearbyTransportChannel(context: Context) :
     // -----------------------------------------------------------------
 
     private fun sendFramed(endpoints: List<String>, payload: String) {
-        val bytes = payload.toByteArray(UTF_8)
-        val total = (bytes.size + CHUNK_BYTES - 1) / CHUNK_BYTES
-        val msgId = UUID.randomUUID().toString().substring(0, 8)
-        for (index in 0 until total) {
-            val from = index * CHUNK_BYTES
-            val to = minOf(from + CHUNK_BYTES, bytes.size)
-            val header = "$FRAME_MAGIC|$msgId|$index|$total|".toByteArray(UTF_8)
-            val frame = header + bytes.copyOfRange(from, to)
+        for (frame in PayloadFraming.frame(payload)) {
             for (endpoint in endpoints) {
                 client.sendPayload(endpoint, Payload.fromBytes(frame))
             }
@@ -296,59 +283,8 @@ class NearbyTransportChannel(context: Context) :
     private val payloadCallback = object : PayloadCallback() {
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
             val bytes = payload.asBytes() ?: return
-            // Locate the ASCII header "AOM1|msgId|index|total|" at the BYTE
-            // level, then keep the slice as RAW BYTES. Decoding each chunk
-            // as its own UTF-8 String (as the old code did) corrupts any
-            // multibyte character split across a 24 KB boundary into U+FFFD —
-            // and a single changed byte fails the CRDT Ed25519 signature,
-            // silently dropping large multilingual batches. '|' (0x7C) never
-            // occurs inside a multibyte UTF-8 sequence, so scanning for the
-            // 4 header pipes is byte-safe even when the slice contains '|'.
-            val pipe = '|'.code.toByte()
-            var pipes = 0
-            var sliceStart = -1
-            for (i in bytes.indices) {
-                if (bytes[i] == pipe && ++pipes == 4) {
-                    sliceStart = i + 1
-                    break
-                }
-            }
-            if (sliceStart < 0) return
-            val header = String(bytes, 0, sliceStart, UTF_8).split('|')
-            if (header.size < 4 || header[0] != FRAME_MAGIC) return
-            val msgId = header[1]
-            val index = header[2].toIntOrNull() ?: return
-            val total = header[3].toIntOrNull() ?: return
-            if (total <= 0 || index !in 0 until total) return
-
-            val slots = reassembly.getOrPut(msgId) {
-                // Bounded reassembly memory: evict oldest incomplete
-                // message when a hostile peer floods partial frames.
-                if (reassembly.size >= MAX_PENDING_REASSEMBLIES) {
-                    reassembly.remove(reassembly.keys.first())
-                }
-                arrayOfNulls(total)
-            }
-            if (slots.size != total) {
-                reassembly.remove(msgId)
-                return
-            }
-            slots[index] = bytes.copyOfRange(sliceStart, bytes.size)
-            if (slots.all { it != null }) {
-                reassembly.remove(msgId)
-                val full = ByteArray(slots.sumOf { it!!.size })
-                var off = 0
-                for (slice in slots) {
-                    slice!!.copyInto(full, off)
-                    off += slice.size
-                }
-                emit(
-                    mapOf(
-                        "type" to "payloadReceived",
-                        "payload" to String(full, UTF_8),
-                    )
-                )
-            }
+            val complete = reassembler.accept(bytes) ?: return
+            emit(mapOf("type" to "payloadReceived", "payload" to complete))
         }
 
         override fun onPayloadTransferUpdate(
