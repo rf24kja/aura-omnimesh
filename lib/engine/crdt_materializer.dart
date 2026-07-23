@@ -115,6 +115,15 @@ class CrdtMaterializer implements DeltaApplier {
         continue;
       }
 
+      // Module B compute ops (compute_task_*) share the log but are folded by
+      // foldComputeTask, never here. Recognise and skip them BEFORE any intent
+      // processing so a compute-task uuid does not masquerade as a malformed
+      // intent and inflate this fold's rejected-rule diagnostics.
+      final opName = payload['op'];
+      if (opName is String && opName.startsWith('compute_task_')) {
+        continue;
+      }
+
       final author = payload['author'];
       if (author is! String) {
         rejectedRule += 1;
