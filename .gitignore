@@ -47,3 +47,8 @@ app.*.map.json
 
 # Wrangler (Cloudflare) local cache/state — never commit
 .wrangler/
+
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
