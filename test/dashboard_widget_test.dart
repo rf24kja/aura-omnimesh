@@ -67,6 +67,18 @@ class _FakeInference implements EdgeInferenceService {
       List<double>.filled(kEmbeddingDimensions, 0.1);
 }
 
+ResourceIntent _energyRow(String metric, int value, {required int epoch}) =>
+    ResourceIntent(
+      intentUuid: '$metric-$epoch',
+      originNodeKey: 'node',
+      allocationCategory: AllocationCategory.energyTelemetry,
+      rawTextPayload: metric,
+      vectorData: List<double>.filled(kEmbeddingDimensions, 0.0),
+      structuralQuantity: value,
+      epochTimestamp: epoch,
+      direction: IntentDirection.offer,
+    );
+
 ResourceIntent _intent({
   required String uuid,
   required String owner,
@@ -342,5 +354,29 @@ void main() {
     expect(find.text('OFFERED'), findsOneWidget);
     expect(find.text('YOU REQUESTED'), findsOneWidget);
     expect(find.text('embed this text'), findsOneWidget);
+  });
+
+  testWidgets('GRID tab: shows the latest reading per metric, deduped',
+      (tester) async {
+    await tester.runAsync(() async {
+      await buildStack();
+      // Two pv_power readings (old + new) and one battery_soc.
+      await repository.upsertIntent(_energyRow('pv_power', 100, epoch: 1000));
+      await repository.upsertIntent(_energyRow('pv_power', 250, epoch: 2000));
+      await repository.upsertIntent(_energyRow('battery_soc', 85, epoch: 1500));
+      await adapter.attach();
+    });
+    await tester.pumpWidget(host());
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.text('GRID'));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Latest pv_power (250) shown; the older 100 is deduped away.
+    expect(find.text('PV_POWER'), findsOneWidget);
+    expect(find.text('250'), findsOneWidget);
+    expect(find.text('100'), findsNothing);
+    expect(find.text('BATTERY_SOC'), findsOneWidget);
+    expect(find.text('85'), findsOneWidget);
   });
 }

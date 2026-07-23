@@ -1318,12 +1318,22 @@ class _GridPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (intents.isEmpty) {
+    // One tile per metric — its LATEST reading. The energy pipeline appends a
+    // new row per downsampled sample, and [intents] arrive newest-first, so the
+    // first row seen for a metric name is its current value.
+    final latest = <String, ResourceIntent>{};
+    for (final i in intents) {
+      latest.putIfAbsent(i.rawTextPayload, () => i);
+    }
+    final tiles = latest.values.toList();
+
+    if (tiles.isEmpty) {
       return const _EmptyState(
-        title: 'NO GRID NODES ON MESH',
-        detail: 'Energy telemetry tiles appear here as adjacent microgrid '
-            'nodes gossip surplus and demand. Layout is wired for the '
-            'Modbus TCP / MQTT inverter gateway (Module C).',
+        title: 'NO GRID TELEMETRY YET',
+        detail: 'Live inverter metrics (PV power, battery state of charge, '
+            'grid flow) appear here once a Modbus TCP / MQTT source is '
+            'connected on the LAN. Read-only by design — control is opt-in '
+            'and explicitly confirmed (Module C).',
       );
     }
     return GridView.builder(
@@ -1334,8 +1344,8 @@ class _GridPane extends StatelessWidget {
         crossAxisSpacing: AuraSpace.s2,
         childAspectRatio: 1.4,
       ),
-      itemCount: intents.length,
-      itemBuilder: (context, index) => _EnergyTile(intent: intents[index]),
+      itemCount: tiles.length,
+      itemBuilder: (context, index) => _EnergyTile(intent: tiles[index]),
     );
   }
 }
@@ -1344,8 +1354,6 @@ class _EnergyTile extends StatelessWidget {
   const _EnergyTile({required this.intent});
 
   final ResourceIntent intent;
-
-  bool get _isSurplus => intent.direction == IntentDirection.offer;
 
   String get _age {
     final delta = DateTime.now().toUtc().difference(
@@ -1374,25 +1382,24 @@ class _EnergyTile extends StatelessWidget {
               Container(
                 width: AuraStroke.indicator,
                 height: 12,
-                color:
-                    _isSurplus ? AuraColors.emerald : AuraColors.amber,
+                color: AuraColors.emerald,
               ),
               const SizedBox(width: AuraSpace.s1),
-              Text(_isSurplus ? 'SURPLUS' : 'DEMAND',
-                  style: AuraType.label),
+              Expanded(
+                child: Text(
+                  intent.rawTextPayload.toUpperCase(),
+                  style: AuraType.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
           const Spacer(),
           Text('${intent.structuralQuantity}',
               style: AuraType.metricLarge),
-          Text('WATT-HOURS', style: AuraType.label),
           const SizedBox(height: AuraSpace.s1),
-          Text(
-            '${intent.originNodeKey.substring(0, 8)}…  ·  $_age',
-            style: AuraType.bodyDim,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          Text(_age, style: AuraType.bodyDim),
         ],
       ),
     );
