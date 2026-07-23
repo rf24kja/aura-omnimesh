@@ -17,7 +17,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../compute/compute_task.dart';
+import '../compute/repository_compute_gateway.dart';
 import '../compute/swarm_compute_gate.dart';
+import '../compute/swarm_compute_requester.dart';
 import '../domain/domain_models.dart';
 import '../services/services.dart';
 import '../transport/bridge_handle.dart';
@@ -31,6 +34,8 @@ class DashboardView extends StatefulWidget {
     super.key,
     required this.adapter,
     required this.computeGate,
+    required this.computeRequester,
+    required this.computeGateway,
     required this.repository,
     required this.onCommandSubmitted,
     this.bridge,
@@ -38,6 +43,8 @@ class DashboardView extends StatefulWidget {
 
   final MeshUiAdapter adapter;
   final SwarmComputeGate computeGate;
+  final SwarmComputeRequester computeRequester;
+  final RepositoryComputeTaskGateway computeGateway;
   final MeshRepository repository;
   final Future<void> Function(String command) onCommandSubmitted;
 
@@ -53,6 +60,7 @@ class _DashboardViewState extends State<DashboardView> {
 
   final TextEditingController _commandController = TextEditingController();
   final FocusNode _commandFocus = FocusNode();
+  final TextEditingController _computeOfferController = TextEditingController();
 
   _Module _module = _Module.exchange;
   bool _submitting = false;
@@ -75,11 +83,15 @@ class _DashboardViewState extends State<DashboardView> {
   List<ResourceIntent> _energyIntents = const [];
   int _lastSeenClock = -1;
 
+  /// Module B compute-task queue, reloaded when the local clock advances.
+  List<ComputeTaskState> _computeTasks = const [];
+
   @override
   void initState() {
     super.initState();
     widget.adapter.state.addListener(_onAdapterState);
     _reloadEnergy();
+    _reloadCompute();
   }
 
   @override
@@ -87,6 +99,7 @@ class _DashboardViewState extends State<DashboardView> {
     widget.adapter.state.removeListener(_onAdapterState);
     _commandController.dispose();
     _commandFocus.dispose();
+    _computeOfferController.dispose();
     super.dispose();
   }
 
@@ -95,6 +108,7 @@ class _DashboardViewState extends State<DashboardView> {
     if (clock != _lastSeenClock) {
       _lastSeenClock = clock;
       _reloadEnergy();
+      _reloadCompute();
     }
   }
 
@@ -105,6 +119,19 @@ class _DashboardViewState extends State<DashboardView> {
     rows.sort((a, b) => b.epochTimestamp.compareTo(a.epochTimestamp));
     if (!mounted) return;
     setState(() => _energyIntents = List.unmodifiable(rows));
+  }
+
+  Future<void> _reloadCompute() async {
+    final tasks = await widget.computeGateway.allComputeTasks();
+    if (!mounted) return;
+    setState(() => _computeTasks = List.unmodifiable(tasks));
+  }
+
+  Future<void> _offerCompute(String text) async {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return;
+    await widget.computeRequester.offer(trimmed);
+    await _reloadCompute();
   }
 
   // -------------------------------------------------------------------
@@ -296,6 +323,10 @@ class _DashboardViewState extends State<DashboardView> {
                 gate: widget.computeGate,
                 optedIn: _computeOptIn,
                 onToggle: _toggleComputeOptIn,
+                tasks: _computeTasks,
+                selfKey: widget.computeRequester.publicKeyHex,
+                onOffer: _offerCompute,
+                offerController: _computeOfferController,
               ),
             _Module.grid => _GridPane(
                 intents: _energyIntents,
@@ -998,11 +1029,25 @@ class _ComputePane extends StatelessWidget {
     required this.gate,
     required this.optedIn,
     required this.onToggle,
+    required this.tasks,
+    required this.selfKey,
+    required this.onOffer,
+    required this.offerController,
   });
 
   final SwarmComputeGate gate;
   final bool optedIn;
   final ValueChanged<bool> onToggle;
+
+  /// Compute-task queue folded from the log (offered/claimed/completed).
+  final List<ComputeTaskState> tasks;
+
+  /// This device's key, to tag tasks it requested or is working.
+  final String selfKey;
+
+  /// Publish a new compute task for the given input text.
+  final ValueChanged<String> onOffer;
+  final TextEditingController offerController;
 
   static ({String word, String detail, Color color}) _describe(
     ComputeEligibility state,
@@ -1039,6 +1084,48 @@ class _ComputePane extends StatelessWidget {
             color: AuraColors.slate,
           ),
       };
+
+  static Widget _computeTaskRow(ComputeTaskState t, String selfKey) {
+    final (String word, Color color) = switch (t.status) {
+      ComputeTaskStatus.offered => ('OFFERED', AuraColors.slate),
+      ComputeTaskStatus.claimed => ('WORKING', AuraColors.amber),
+      ComputeTaskStatus.completed => ('DONE', AuraColors.emerald),
+      ComputeTaskStatus.withdrawn => ('WITHDRAWN', AuraColors.slate),
+    };
+    final tag = t.requesterKey == selfKey
+        ? 'YOU REQUESTED'
+        : t.claimedByKey == selfKey
+            ? 'YOU ARE WORKING'
+            : null;
+    return Container(
+      margin: const EdgeInsets.only(bottom: AuraSpace.s1),
+      padding: const EdgeInsets.all(AuraSpace.s2),
+      decoration: BoxDecoration(
+        border: Border(
+          left: BorderSide(color: color, width: AuraStroke.indicator),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(word, style: AuraType.label),
+              if (tag != null) Text(tag, style: AuraType.label),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            t.inputText,
+            style: AuraType.body,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1155,6 +1242,45 @@ class _ComputePane extends StatelessWidget {
                 ),
               ),
             ],
+
+            // Compute-task queue (Module B). Visible regardless of opt-in so a
+            // requester can watch its own tasks even on a device that
+            // contributes nothing to the swarm.
+            const SizedBox(height: AuraSpace.s4),
+            const _SectionHeader(label: 'COMPUTE QUEUE', inset: false),
+            const SizedBox(height: AuraSpace.s2),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: offerController,
+                    style: AuraType.body,
+                    decoration: const InputDecoration(
+                      hintText: 'Offer text to embed…',
+                      isDense: true,
+                    ),
+                    onSubmitted: (v) {
+                      onOffer(v);
+                      offerController.clear();
+                    },
+                  ),
+                ),
+                const SizedBox(width: AuraSpace.s2),
+                TextButton(
+                  onPressed: () {
+                    onOffer(offerController.text);
+                    offerController.clear();
+                  },
+                  child: const Text('OFFER', style: AuraType.label),
+                ),
+              ],
+            ),
+            const SizedBox(height: AuraSpace.s2),
+            if (tasks.isEmpty)
+              const Text('No compute tasks on the mesh yet.',
+                  style: AuraType.bodyDim)
+            else
+              ...tasks.map((t) => _computeTaskRow(t, selfKey)),
           ],
         );
       },

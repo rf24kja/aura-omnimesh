@@ -64,6 +64,9 @@ class SwarmComputeRequester {
   final IdentitySigner _signer;
   final ComputeTaskGateway _gateway;
 
+  /// This device's public key — the requesterKey stamped on tasks it offers.
+  String get publicKeyHex => _signer.publicKeyHex;
+
   /// Publish a compute task for [inputText]; returns its uuid.
   Future<String> offer(String inputText) async {
     final uuid = secureUuidV4();

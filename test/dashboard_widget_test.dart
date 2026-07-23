@@ -8,7 +8,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:omnimesh/compute/repository_compute_gateway.dart';
 import 'package:omnimesh/compute/swarm_compute_gate.dart';
+import 'package:omnimesh/compute/swarm_compute_requester.dart';
 import 'package:omnimesh/crypto/ed25519_signer.dart';
 import 'package:omnimesh/domain/domain_models.dart';
 import 'package:omnimesh/engine/crdt_materializer.dart';
@@ -52,6 +54,19 @@ class _FakeTransport implements LocalMeshTransportService {
   }
 }
 
+class _FakeInference implements EdgeInferenceService {
+  @override
+  Future<void> warmUp() async {}
+  @override
+  InferenceAccelerator get activeAccelerator =>
+      InferenceAccelerator.cpuFallback;
+  @override
+  Future<void> dispose() async {}
+  @override
+  Future<List<double>> generateEmbedding(String input) async =>
+      List<double>.filled(kEmbeddingDimensions, 0.1);
+}
+
 ResourceIntent _intent({
   required String uuid,
   required String owner,
@@ -79,6 +94,8 @@ void main() {
   late MeshSyncEngine engine;
   late MeshUiAdapter adapter;
   late Ed25519IdentitySigner self;
+  late RepositoryComputeTaskGateway computeGateway;
+  late SwarmComputeRequester computeRequester;
 
   Future<void> buildStack() async {
     repository = InMemoryMeshRepository();
@@ -96,6 +113,13 @@ void main() {
       ringFacade: RingMatchFacade(repository: repository),
       signer: self,
     );
+    computeGateway =
+        RepositoryComputeTaskGateway(repository: repository, engine: engine);
+    computeRequester = SwarmComputeRequester(
+      inference: _FakeInference(),
+      signer: self,
+      gateway: computeGateway,
+    );
   }
 
   Widget host() => MaterialApp(
@@ -103,6 +127,8 @@ void main() {
         home: DashboardView(
           adapter: adapter,
           computeGate: SwarmComputeGate(trustedSsids: const {}),
+          computeRequester: computeRequester,
+          computeGateway: computeGateway,
           repository: repository,
           onCommandSubmitted: (_) async {},
         ),
@@ -285,5 +311,36 @@ void main() {
       final row = await repository.findIntentByUuid('mine-open');
       expect(row!.status, IntentStatus.withdrawn);
     });
+  });
+
+  testWidgets('COMPUTE tab: offering a task shows it in the queue',
+      (tester) async {
+    await tester.runAsync(() async {
+      await buildStack();
+      await adapter.attach();
+    });
+    await tester.pumpWidget(host());
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.text('COMPUTE'));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // The queue is at the bottom of the pane's lazy ListView — scroll it in.
+    final pane = find.byType(Scrollable).last;
+    await tester.scrollUntilVisible(find.text('COMPUTE QUEUE'), 300,
+        scrollable: pane);
+    expect(find.text('No compute tasks on the mesh yet.'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).last, 'embed this text');
+    await tester.runAsync(() async {
+      await tester.tap(find.text('OFFER'));
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    });
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.scrollUntilVisible(find.text('OFFERED'), 300, scrollable: pane);
+    expect(find.text('OFFERED'), findsOneWidget);
+    expect(find.text('YOU REQUESTED'), findsOneWidget);
+    expect(find.text('embed this text'), findsOneWidget);
   });
 }

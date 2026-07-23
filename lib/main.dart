@@ -22,7 +22,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'compute/repository_compute_gateway.dart';
 import 'compute/swarm_compute_gate.dart';
+import 'compute/swarm_compute_requester.dart';
+import 'compute/swarm_compute_worker.dart';
 import 'crypto/ed25519_signer.dart';
 import 'data/isar_mesh_repository.dart';
 import 'domain/domain_models.dart';
@@ -87,6 +90,9 @@ class AppServices {
     required this.adapter,
     required this.composer,
     required this.computeGate,
+    required this.computeWorker,
+    required this.computeRequester,
+    required this.computeGateway,
     required this.bridge,
     required this.scorer,
     required this.materializer,
@@ -101,6 +107,12 @@ class AppServices {
   final MeshUiAdapter adapter;
   final IntentComposer composer;
   final SwarmComputeGate computeGate;
+
+  /// Module B: the swarm worker (self-gated by [computeGate]) and the
+  /// requester + gateway that publish/read compute tasks over the same log.
+  final SwarmComputeWorker computeWorker;
+  final SwarmComputeRequester computeRequester;
+  final RepositoryComputeTaskGateway computeGateway;
 
   /// Core Node LAN bridge (PLATFORM_SETUP §3); null on web Light Clients.
   final BridgeHandle? bridge;
@@ -117,6 +129,7 @@ class AppServices {
     // Bridge first, before the engine, so client relays stop cleanly.
     await bridge?.dispose();
     await scorer.dispose();
+    await computeWorker.dispose();
     computeGate.stop();
     await adapter.dispose();
     await engine.dispose(); // Stops discovery internally.
@@ -261,6 +274,24 @@ Future<AppServices> bootstrap() async {
     ..attachTo(engine.onNewDeltasPersisted);
   unawaited(scorer.recompute()); // Seed from already-persisted history.
 
+  // --- 7c. Compute worker + requester (Module B). --------------------------
+  // The worker self-gates: it only claims tasks while SwarmComputeGate reports
+  // `eligible`, so on web/light clients (telemetry unreadable → indeterminate)
+  // it stays dormant. Both ride the same signed log through the engine.
+  final computeGateway =
+      RepositoryComputeTaskGateway(repository: repository, engine: engine);
+  final computeWorker = SwarmComputeWorker(
+    gate: computeGate,
+    inference: inference,
+    signer: signer,
+    gateway: computeGateway,
+  )..start();
+  final computeRequester = SwarmComputeRequester(
+    inference: inference,
+    signer: signer,
+    gateway: computeGateway,
+  );
+
   // --- 8. Core Node LAN bridge (PLATFORM_SETUP §3, native only). -----------
   BridgeHandle? bridge = createBridgeServer(
     signer: signer,
@@ -287,6 +318,9 @@ Future<AppServices> bootstrap() async {
     adapter: adapter,
     composer: composer,
     computeGate: computeGate,
+    computeWorker: computeWorker,
+    computeRequester: computeRequester,
+    computeGateway: computeGateway,
     bridge: bridge,
     scorer: scorer,
     materializer: materializer,
@@ -793,6 +827,8 @@ class _Shell extends StatelessWidget {
           child: DashboardView(
             adapter: services.adapter,
             computeGate: services.computeGate,
+            computeRequester: services.computeRequester,
+            computeGateway: services.computeGateway,
             repository: services.repository,
             onCommandSubmitted: services.composer.submitCommand,
             bridge: services.bridge,

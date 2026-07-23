@@ -42,23 +42,37 @@ class RepositoryComputeTaskGateway implements ComputeTaskGateway {
 
   @override
   Future<List<String>> offeredTaskUuids() async {
-    // readDeltasSince is strictly-greater-than; clocks start at 0, so -1
-    // selects the entire durable log.
-    final all = await _repository.readDeltasSince(-1);
-    final candidates = <String>{};
-    for (final d in all) {
-      final op = _peekOp(d.operationPayloadJson);
-      if (op != null && op.startsWith('compute_task_')) {
-        candidates.add(d.targetIntentUuid);
-      }
-    }
     final offered = <String>[];
-    for (final uuid in candidates) {
-      final state =
-          (await foldComputeTask(await _repository.readCausalLog(uuid))).state;
-      if (state?.status == ComputeTaskStatus.offered) offered.add(uuid);
+    for (final t in await allComputeTasks()) {
+      if (t.status == ComputeTaskStatus.offered) offered.add(t.taskUuid);
     }
     return offered;
+  }
+
+  /// Every compute task on the log with its current folded state — the read
+  /// model for the COMPUTE-tab queue. Ordered by task uuid for stability.
+  Future<List<ComputeTaskState>> allComputeTasks() async {
+    final tasks = <ComputeTaskState>[];
+    for (final uuid in (await _computeTaskUuids()).toList()..sort()) {
+      final state =
+          (await foldComputeTask(await _repository.readCausalLog(uuid))).state;
+      if (state != null) tasks.add(state);
+    }
+    return tasks;
+  }
+
+  /// Distinct uuids that carry a compute_task_* op. Log scan (readDeltasSince
+  /// is strictly-greater-than; clocks start at 0, so -1 selects the whole
+  /// durable log).
+  Future<Set<String>> _computeTaskUuids() async {
+    final uuids = <String>{};
+    for (final d in await _repository.readDeltasSince(-1)) {
+      final op = _peekOp(d.operationPayloadJson);
+      if (op != null && op.startsWith('compute_task_')) {
+        uuids.add(d.targetIntentUuid);
+      }
+    }
+    return uuids;
   }
 
   /// Cheap op-name peek without a full typed decode.
